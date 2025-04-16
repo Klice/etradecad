@@ -5,6 +5,7 @@ on:
 
 env:
   CI: ""
+  PUBLIC_URL: "/etradecad"
 
 permissions:
   contents: read
