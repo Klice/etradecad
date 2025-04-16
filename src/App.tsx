@@ -3,6 +3,7 @@ import CsvUploader from './components/CsvUploader';
 import { parseCsv } from './utils/csvParser';
 import { GainsCalculator, ResultsType } from './utils/GainsCalculator';
 import Results from './components/Results';
+import Footer from './components/Footer';
 
 const App: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
@@ -23,7 +24,9 @@ const App: React.FC = () => {
             <h1>eTrade Gains/Losses USD to CAD coverter</h1>
             <CsvUploader onFileUpload={handleFileUpload} />
             <Results data={data} gains={results?.gains} total={results?.total} />
+            <Footer />
         </div>
+
     );
 };
 
