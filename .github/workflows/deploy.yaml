@@ -4,7 +4,6 @@ on:
       - "main" # change to the branch you wish to deploy from
 
 env:
-  CI: ""
   PUBLIC_URL: "/etradecad"
 
 permissions:
