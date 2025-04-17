@@ -1,11 +1,12 @@
 import React from 'react';
 import { Accordion, Stack } from 'react-bootstrap';
 import DataTable from './DataTable';
+import { EtradeData, GainsType } from '../utils/GainsCalculator';
 
 interface ResultsProps {
-    data: Array<any>;
-    gains: Array<any> | undefined;
-    total: any | undefined;
+    data: Array<EtradeData>;
+    gains: Array<GainsType> | undefined;
+    total: GainsType | undefined;
 }
 
 const Results: React.FC<ResultsProps> = ({ data, gains, total }) => {
