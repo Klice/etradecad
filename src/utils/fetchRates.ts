@@ -1,5 +1,12 @@
 import axios from 'axios';
 
+interface Obeservation {
+    d: string; // Date in 'YYYY-MM-DD' format
+    FXUSDCAD?: {
+        v: string; // Conversion rate
+    };
+}
+
 export class ExchangeRateFetcher {
     private apiUrl: string;
 
@@ -39,11 +46,11 @@ export class ExchangeRateFetcher {
         }
     }
 
-    private findObservationByDate(observations: any[], date: Date): any {
-        return observations.find((obs: any) => obs.d === date.toISOString().split('T')[0]);
+    private findObservationByDate(observations: Obeservation[], date: Date): Obeservation | undefined {
+        return observations.find((obs) => obs.d === date.toISOString().split('T')[0]);
     }
 
-    private findObservationByDateWithLookback(observations: any[], date: Date): any {
+    private findObservationByDateWithLookback(observations: Obeservation[], date: Date): Obeservation | undefined {
         const maxlookbackDays = 2; // Number of days to look back
         let lookbackDays = 0;
         while (lookbackDays <= maxlookbackDays) {
@@ -55,5 +62,6 @@ export class ExchangeRateFetcher {
             }
             lookbackDays++;
         }
+        return undefined;
     }
 }

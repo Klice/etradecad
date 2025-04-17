@@ -1,6 +1,7 @@
 import Papa from "papaparse";
+import { EtradeData } from "./GainsCalculator";
 
-export const parseCsv = (file: File): Promise<any[]> => {
+export const parseCsv = (file: File): Promise<EtradeData[]> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -16,7 +17,7 @@ export const parseCsv = (file: File): Promise<any[]> => {
                     });
                 },
             });
-            resolve(results.data)
+            resolve(results.data as EtradeData[])
         };
 
         reader.onerror = () => {
