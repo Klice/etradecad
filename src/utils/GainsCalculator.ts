@@ -51,7 +51,7 @@ export class GainsCalculator {
                     "Proceeds": proceeds.toFixed(2),
                     "Cost base": costBase.toFixed(2),
                     "Expenses": 0,
-                    "Gain (loss)": (costBase - proceeds).toFixed(2),
+                    "Gain (loss)": (proceeds - costBase).toFixed(2),
                 });
             });
 
