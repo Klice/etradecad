@@ -16,6 +16,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
         <Table striped bordered hover>
             <thead>
                 <tr>
+                    <th>#</th>
                     {headers.map((header) => (
                         <th scope="col" key={header}>{header}</th>
                     ))}
@@ -24,6 +25,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
             <tbody>
                 {data.map((row, index) => (
                     <tr key={index}>
+                        <th>{index + 1}</th>
                         {headers.map((header) => (
                             <td key={header}>{row[header]}</td>
                         ))}
