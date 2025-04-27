@@ -40,8 +40,8 @@ export interface EtradeData {
 }
 
 const periods: Period[] = [
-    new Period(new Date("2024-01-01"), new Date("2024-06-24"), "Period 1"),
-    new Period(new Date("2024-06-25"), new Date("2024-12-31"), "Period 2"),
+    new Period(new Date(2024, 1 - 1, 1), new Date(2024, 6 - 1, 24), "Period 1"),
+    new Period(new Date(2024, 6 - 1, 25), new Date(2024, 12 - 1, 31), "Period 2"),
 ];
 
 export class GainsCalculator {
