@@ -34,7 +34,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
                         <tr key={index}>
                             <th>{index + 1}</th>
                             {headers.map((header) => (
-                                <td key={header}>{row[header]}</td>
+                                <td key={header}>{row[header].toString()}</td>
                             ))}
                         </tr>
                     ))}

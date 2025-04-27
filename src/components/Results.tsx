@@ -4,9 +4,9 @@ import DataTable from './DataTable';
 import { EtradeData, GainsType } from '../utils/GainsCalculator';
 
 interface ResultsProps {
-    data: Array<EtradeData>;
-    gains: Array<GainsType> | undefined;
-    total: GainsType | undefined;
+    data: EtradeData[];
+    gains: GainsType[] | undefined;
+    total: GainsType[] | undefined;
 }
 
 const Results: React.FC<ResultsProps> = ({ data, gains, total }) => {
@@ -29,7 +29,7 @@ const Results: React.FC<ResultsProps> = ({ data, gains, total }) => {
 
             <div className="p-2">
                 <h4>Total Gains/Losses in CAD</h4>
-                {total && <DataTable data={[total]} />}
+                {total && <DataTable data={total} />}
             </div>
 
             <div className="p-2">
