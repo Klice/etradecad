@@ -2,10 +2,21 @@ import { Table } from 'react-bootstrap';
 import { CSVLink } from 'react-csv';
 import { GAIN_FIELD, type GainsType } from '../utils/GainsCalculator';
 import { formatCurrency, formatDate, gainClass } from '../utils/format';
+import { formatMoney } from '../utils/money';
 
 interface TransactionsTableProps {
     data: GainsType[];
 }
+
+const toCsvRow = (row: GainsType) => ({
+    [GAIN_FIELD.Period]: row[GAIN_FIELD.Period].name,
+    [GAIN_FIELD.DateSold]: row[GAIN_FIELD.DateSold],
+    [GAIN_FIELD.Description]: row[GAIN_FIELD.Description],
+    [GAIN_FIELD.Proceeds]: formatMoney(row[GAIN_FIELD.Proceeds]),
+    [GAIN_FIELD.CostBase]: formatMoney(row[GAIN_FIELD.CostBase]),
+    [GAIN_FIELD.Expenses]: formatMoney(row[GAIN_FIELD.Expenses]),
+    [GAIN_FIELD.GainLoss]: formatMoney(row[GAIN_FIELD.GainLoss]),
+});
 
 const TransactionsTable = ({ data }: TransactionsTableProps) => {
     if (!data || data.length === 0) {
@@ -17,7 +28,7 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
     return (
         <div>
             <div className="mb-3 text-end">
-                <CSVLink className="btn btn-sm btn-outline-primary" data={data}>
+                <CSVLink className="btn btn-sm btn-outline-primary" data={data.map(toCsvRow)}>
                     Download CSV
                 </CSVLink>
             </div>

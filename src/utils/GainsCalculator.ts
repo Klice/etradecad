@@ -1,15 +1,13 @@
-import { format, isWithinInterval } from 'date-fns';
-import { parseCurrency, toIsoDate } from './format';
+import { isWithinInterval } from 'date-fns';
+import { toIsoDate } from './format';
 import { fetchRates } from './fetchRates';
+import { addMoney, moneyFromString, mulMoney, subMoney, sumMoney, ZERO, type Money } from './money';
 
 export type Period = {
     start: Date;
     end: Date;
     name: string;
 };
-
-export const formatPeriod = (p: Period): string =>
-    `${p.name}: ${format(p.start, 'P')} - ${format(p.end, 'P')}`;
 
 export const GAIN_FIELD = {
     Period: 'Period',
@@ -39,10 +37,10 @@ export type GainsType = {
     [GAIN_FIELD.Period]: Period;
     [GAIN_FIELD.DateSold]: string;
     [GAIN_FIELD.Description]: string;
-    [GAIN_FIELD.Proceeds]: number;
-    [GAIN_FIELD.CostBase]: number;
-    [GAIN_FIELD.Expenses]: number;
-    [GAIN_FIELD.GainLoss]: number;
+    [GAIN_FIELD.Proceeds]: Money;
+    [GAIN_FIELD.CostBase]: Money;
+    [GAIN_FIELD.Expenses]: Money;
+    [GAIN_FIELD.GainLoss]: Money;
 };
 
 export type EtradeData = {
@@ -60,13 +58,13 @@ export type EtradeData = {
 export interface VerificationData {
     sellCount: number;
     uniqueDates: number;
-    usdProceeds: number;
-    usdGainLoss: number;
+    usdProceeds: Money;
+    usdGainLoss: Money;
 }
 
 export interface ExchangeRate {
     date: string;
-    rate: number;
+    rate: Money;
 }
 
 export interface ResultsType {
@@ -82,8 +80,7 @@ type NumericGainKey =
     | typeof GAIN_FIELD.Expenses
     | typeof GAIN_FIELD.GainLoss;
 
-const strToNum = (str: string): number => parseCurrency(str) ?? 0;
-const round2 = (n: number): number => Math.round(n * 100) / 100;
+const parseMoney = (str: string): Money => moneyFromString(str) ?? ZERO;
 
 const findPeriod = (periods: Period[], date: Date): Period => {
     const period = periods.find(p => isWithinInterval(date, { start: p.start, end: p.end }));
@@ -96,30 +93,29 @@ const findPeriod = (periods: Period[], date: Date): Period => {
 const buildGain = (
     row: EtradeData,
     periods: Period[],
-    rates: Record<string, number>,
+    rates: Record<string, Money>,
 ): GainsType => {
     const dateSold = new Date(row[ETRADE_FIELD.DateSold]);
     const dateAcquired = new Date(row[ETRADE_FIELD.DateAcquired]);
-    const proceedsUsd = strToNum(row[ETRADE_FIELD.TotalProceeds]);
-    const costBaseUsd = strToNum(row[ETRADE_FIELD.AdjustedCostBasis]);
-    const proceeds = proceedsUsd * rates[toIsoDate(dateSold)];
-    const costBase = costBaseUsd * rates[toIsoDate(dateAcquired)];
+    const proceedsUsd = parseMoney(row[ETRADE_FIELD.TotalProceeds]);
+    const costBaseUsd = parseMoney(row[ETRADE_FIELD.AdjustedCostBasis]);
+    const proceeds = mulMoney(proceedsUsd, rates[toIsoDate(dateSold)]);
+    const costBase = mulMoney(costBaseUsd, rates[toIsoDate(dateAcquired)]);
 
     return {
         [GAIN_FIELD.Period]: findPeriod(periods, dateSold),
         [GAIN_FIELD.DateSold]: row[ETRADE_FIELD.DateSold],
         [GAIN_FIELD.Description]: `${row[ETRADE_FIELD.Symbol]} ${row[ETRADE_FIELD.PlanType]}`,
-        [GAIN_FIELD.Proceeds]: round2(proceeds),
-        [GAIN_FIELD.CostBase]: round2(costBase),
-        [GAIN_FIELD.Expenses]: 0,
-        [GAIN_FIELD.GainLoss]: round2(proceeds - costBase),
+        [GAIN_FIELD.Proceeds]: proceeds,
+        [GAIN_FIELD.CostBase]: costBase,
+        [GAIN_FIELD.Expenses]: ZERO,
+        [GAIN_FIELD.GainLoss]: subMoney(proceeds, costBase),
     };
 };
 
 const totalForPeriod = (period: Period, gains: GainsType[]): GainsType => {
     const inPeriod = gains.filter(g => g[GAIN_FIELD.Period] === period);
-    const sum = (key: NumericGainKey): number =>
-        round2(inPeriod.reduce((acc, row) => acc + row[key], 0));
+    const sum = (key: NumericGainKey): Money => sumMoney(inPeriod.map(row => row[key]));
 
     return {
         [GAIN_FIELD.Period]: period,
@@ -132,17 +128,17 @@ const totalForPeriod = (period: Period, gains: GainsType[]): GainsType => {
     };
 };
 
-const usdTotals = (sales: EtradeData[]): { usdProceeds: number; usdGainLoss: number } =>
-    sales.reduce(
+const usdTotals = (sales: EtradeData[]): { usdProceeds: Money; usdGainLoss: Money } =>
+    sales.reduce<{ usdProceeds: Money; usdGainLoss: Money }>(
         (acc, row) => {
-            const proceeds = strToNum(row[ETRADE_FIELD.TotalProceeds]);
-            const costBase = strToNum(row[ETRADE_FIELD.AdjustedCostBasis]);
+            const proceeds = parseMoney(row[ETRADE_FIELD.TotalProceeds]);
+            const costBase = parseMoney(row[ETRADE_FIELD.AdjustedCostBasis]);
             return {
-                usdProceeds: acc.usdProceeds + proceeds,
-                usdGainLoss: acc.usdGainLoss + (proceeds - costBase),
+                usdProceeds: addMoney(acc.usdProceeds, proceeds),
+                usdGainLoss: addMoney(acc.usdGainLoss, subMoney(proceeds, costBase)),
             };
         },
-        { usdProceeds: 0, usdGainLoss: 0 },
+        { usdProceeds: ZERO, usdGainLoss: ZERO },
     );
 
 export const calculateTax = async (
@@ -167,8 +163,8 @@ export const calculateTax = async (
         verification: {
             sellCount: sales.length,
             uniqueDates: uniqueDateStrs.length,
-            usdProceeds: round2(usdProceeds),
-            usdGainLoss: round2(usdGainLoss),
+            usdProceeds,
+            usdGainLoss,
         },
         exchangeRates,
     };

@@ -1,20 +1,11 @@
 import { format, isValid } from 'date-fns';
+import { formatMoney, type Money } from './money';
 
 const ISO_DATE = 'yyyy-MM-dd';
 
-export const formatCurrency = (value: number): string => {
-    const abs = Math.abs(value);
-    const formatted = abs.toLocaleString('en-CA', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
-    return value < 0 ? `-$${formatted}` : `$${formatted}`;
-};
-
-export const parseCurrency = (str: string | undefined): number | null => {
-    if (!str || str.trim() === '') return null;
-    const value = parseFloat(str.replace(/[$,]/g, ''));
-    return isNaN(value) ? null : value;
+export const formatCurrency = (value: Money): string => {
+    const formatted = formatMoney(value, { decimals: 2, grouping: true });
+    return formatted.startsWith('-') ? `-$${formatted.slice(1)}` : `$${formatted}`;
 };
 
 export const toIsoDate = (date: Date): string => format(date, ISO_DATE);
@@ -26,5 +17,5 @@ export const formatDate = (value: string): string => {
 
 export type GainClass = 'gain-positive' | 'gain-negative';
 
-export const gainClass = (value: number): GainClass =>
-    value >= 0 ? 'gain-positive' : 'gain-negative';
+export const gainClass = (value: Money): GainClass =>
+    value >= 0n ? 'gain-positive' : 'gain-negative';

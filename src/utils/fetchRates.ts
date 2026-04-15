@@ -1,5 +1,6 @@
 import { subDays } from 'date-fns';
 import { toIsoDate } from './format';
+import { moneyFromString, ZERO, type Money } from './money';
 
 interface Observation {
     d: string;
@@ -22,7 +23,7 @@ const findWithLookback = (observations: Observation[], date: Date): Observation 
     return undefined;
 };
 
-export const fetchRates = async (dates: Date[]): Promise<Record<string, number>> => {
+export const fetchRates = async (dates: Date[]): Promise<Record<string, Money>> => {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) {
@@ -33,7 +34,7 @@ export const fetchRates = async (dates: Date[]): Promise<Record<string, number>>
         return Object.fromEntries(
             dates.map(date => {
                 const observation = findWithLookback(data.observations, date);
-                const rate = observation?.FXUSDCAD ? parseFloat(observation.FXUSDCAD.v) : NaN;
+                const rate = observation?.FXUSDCAD ? moneyFromString(observation.FXUSDCAD.v) ?? ZERO : ZERO;
                 return [toIsoDate(date), rate];
             }),
         );

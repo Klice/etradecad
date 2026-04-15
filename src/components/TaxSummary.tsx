@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { CSVLink } from 'react-csv';
 import { GAIN_FIELD, type GainsType, type Period } from '../utils/GainsCalculator';
 import { formatCurrency, gainClass } from '../utils/format';
+import { formatMoney } from '../utils/money';
 
 interface TaxSummaryProps {
     totals: GainsType[];
@@ -9,6 +10,14 @@ interface TaxSummaryProps {
 
 const formatPeriodDates = (period: Period): string =>
     `${format(period.start, 'MMM d')} \u2013 ${format(period.end, 'MMM d, yyyy')}`;
+
+const toCsvRow = (row: GainsType) => ({
+    [GAIN_FIELD.Period]: row[GAIN_FIELD.Period].name,
+    [GAIN_FIELD.Proceeds]: formatMoney(row[GAIN_FIELD.Proceeds]),
+    [GAIN_FIELD.CostBase]: formatMoney(row[GAIN_FIELD.CostBase]),
+    [GAIN_FIELD.Expenses]: formatMoney(row[GAIN_FIELD.Expenses]),
+    [GAIN_FIELD.GainLoss]: formatMoney(row[GAIN_FIELD.GainLoss]),
+});
 
 const PeriodBlock = ({ row, showPeriod }: { row: GainsType; showPeriod: boolean }) => {
     const period = row[GAIN_FIELD.Period];
@@ -54,7 +63,7 @@ const TaxSummary = ({ totals }: TaxSummaryProps) => {
                 <PeriodBlock key={i} row={row} showPeriod={showPeriod} />
             ))}
             <div className="d-flex justify-content-end p-2">
-                <CSVLink className="btn btn-sm btn-outline-primary" data={totals}>
+                <CSVLink className="btn btn-sm btn-outline-primary" data={totals.map(toCsvRow)}>
                     Download CSV
                 </CSVLink>
             </div>
