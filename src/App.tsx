@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { parseCsv, type ParseResult } from './utils/csvParser';
+import { parseXls, type ParseResult } from './utils/xlsParser';
 import { GainsCalculator, Period, type EtradeData, type ResultsType } from './utils/GainsCalculator';
 import LandingPage from './components/LandingPage';
 import ResultsPage from './components/Results';
@@ -15,7 +15,7 @@ const App = () => {
     const [summary, setSummary] = useState<EtradeData | null>(null);
 
     const handleFileSelect = async (file: File) => {
-        const parsed: ParseResult = await parseCsv(file);
+        const parsed: ParseResult = await parseXls(file);
         setSummary(parsed.summary);
         const calculated = await new GainsCalculator(parsed.sales, periods).calculateTax();
         setResults(calculated);

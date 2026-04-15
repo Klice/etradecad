@@ -22,7 +22,7 @@ const FileDropZone = ({ onFileSelect }: FileDropZoneProps) => {
         e.preventDefault();
         setIsDragging(false);
         const file = e.dataTransfer.files[0];
-        if (file && file.name.endsWith('.csv')) {
+        if (file && (file.name.endsWith('.xls') || file.name.endsWith('.xlsx'))) {
             onFileSelect(file);
         }
     };
@@ -47,12 +47,13 @@ const FileDropZone = ({ onFileSelect }: FileDropZoneProps) => {
             onClick={handleClick}
         >
             <div className="drop-zone-icon">&#128196;</div>
-            <p className="fs-5 mb-1">Drag &amp; drop your CSV file here</p>
+            <p className="fs-5 mb-1">Drag &amp; drop your Excel file here</p>
+            <p className="text-muted small mb-1">.xls and .xlsx supported</p>
             <p className="text-muted mb-0">or click to browse</p>
             <input
                 ref={inputRef}
                 type="file"
-                accept=".csv"
+                accept=".xls,.xlsx"
                 onChange={handleChange}
                 style={{ display: 'none' }}
             />

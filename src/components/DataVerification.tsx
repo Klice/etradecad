@@ -63,7 +63,7 @@ const DataVerification = ({ verification, summary }: DataVerificationProps) => {
                     <>
                         <hr />
                         <p className="text-muted mb-2">
-                            <strong>Cross-check against CSV summary row (USD)</strong>
+                            <strong>Cross-check against spreadsheet summary row (USD)</strong>
                         </p>
                         <table className="crosscheck-table">
                             <thead>
