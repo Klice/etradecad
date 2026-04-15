@@ -19,13 +19,9 @@ export const parseXls = async (file: File): Promise<ParseResult> => {
     const headers = rows[0].map(cell => String(cell ?? ''));
     const dataRows = rows.slice(1);
 
-    const allRows: EtradeData[] = dataRows.map(row => {
-        const obj: Record<string, string> = {};
-        headers.forEach((header, i) => {
-            obj[header] = row[i] != null ? String(row[i]) : '';
-        });
-        return obj as EtradeData;
-    });
+    const allRows = dataRows.map(row =>
+        Object.fromEntries(headers.map((header, i) => [header, row[i] != null ? String(row[i]) : '']))
+    ) as EtradeData[];
 
     const summary = allRows.find(r => r['Record Type'] === 'Summary') ?? null;
     const sales = allRows.filter(r => r['Record Type'] === 'Sell');

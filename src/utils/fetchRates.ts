@@ -6,11 +6,7 @@ interface Observation {
 }
 
 export class ExchangeRateFetcher {
-    private apiUrl: string;
-
-    constructor() {
-        this.apiUrl = 'https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json';
-    }
+    private apiUrl = 'https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json';
 
     /**
      * Fetches conversion rates for a list of dates.
@@ -28,7 +24,7 @@ export class ExchangeRateFetcher {
 
             const rates: Record<string, number> = {};
             dates.forEach(date => {
-                const dateStr = date.toISOString().split('T')[0]
+                const dateStr = date.toISOString().split('T')[0];
                 const observation = this.findObservationByDateWithLookback(observations, date);
                 if (observation && observation['FXUSDCAD']) {
                     rates[dateStr] = parseFloat(observation['FXUSDCAD'].v);
@@ -40,7 +36,7 @@ export class ExchangeRateFetcher {
             return rates;
         } catch (error) {
             if (error instanceof Error) {
-                throw new Error('Failed to fetch exchange rates: ' + error.message);
+                throw new Error(`Failed to fetch exchange rates: ${error.message}`);
             } else {
                 throw new Error('Failed to fetch exchange rates: An unknown error occurred.');
             }
