@@ -1,3 +1,7 @@
+import { format, isValid } from 'date-fns';
+
+const ISO_DATE = 'yyyy-MM-dd';
+
 export const formatCurrency = (value: number): string => {
     const abs = Math.abs(value);
     const formatted = abs.toLocaleString('en-CA', {
@@ -13,10 +17,11 @@ export const parseCurrency = (str: string | undefined): number | null => {
     return isNaN(value) ? null : value;
 };
 
+export const toIsoDate = (date: Date): string => format(date, ISO_DATE);
+
 export const formatDate = (value: string): string => {
     const date = new Date(value);
-    if (isNaN(date.getTime())) return value;
-    return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    return isValid(date) ? format(date, ISO_DATE) : value;
 };
 
 export type GainClass = 'gain-positive' | 'gain-negative';

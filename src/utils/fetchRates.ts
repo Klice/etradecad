@@ -1,3 +1,6 @@
+import { subDays } from 'date-fns';
+import { toIsoDate } from './format';
+
 interface Observation {
     d: string;
     FXUSDCAD?: { v: string };
@@ -6,8 +9,6 @@ interface Observation {
 const API_URL = 'https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json';
 const MAX_LOOKBACK_DAYS = 2;
 
-const toIsoDate = (d: Date): string => d.toISOString().split('T')[0];
-
 const findObservation = (observations: Observation[], date: Date): Observation | undefined => {
     const target = toIsoDate(date);
     return observations.find(obs => obs.d === target);
@@ -15,9 +16,7 @@ const findObservation = (observations: Observation[], date: Date): Observation |
 
 const findWithLookback = (observations: Observation[], date: Date): Observation | undefined => {
     for (let days = 0; days <= MAX_LOOKBACK_DAYS; days++) {
-        const lookback = new Date(date);
-        lookback.setDate(date.getDate() - days);
-        const observation = findObservation(observations, lookback);
+        const observation = findObservation(observations, subDays(date, days));
         if (observation?.FXUSDCAD) return observation;
     }
     return undefined;

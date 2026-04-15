@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { CSVLink } from 'react-csv';
 import { GAIN_FIELD, type GainsType, type Period } from '../utils/GainsCalculator';
 import { formatCurrency, gainClass } from '../utils/format';
@@ -6,12 +7,8 @@ interface TaxSummaryProps {
     totals: GainsType[];
 }
 
-const formatPeriodDates = (period: Period): string => {
-    const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    const start = period.start.toLocaleDateString('en-CA', opts);
-    const end = period.end.toLocaleDateString('en-CA', { ...opts, year: 'numeric' });
-    return `${start} \u2013 ${end}`;
-};
+const formatPeriodDates = (period: Period): string =>
+    `${format(period.start, 'MMM d')} \u2013 ${format(period.end, 'MMM d, yyyy')}`;
 
 const PeriodBlock = ({ row, showPeriod }: { row: GainsType; showPeriod: boolean }) => {
     const period = row[GAIN_FIELD.Period];

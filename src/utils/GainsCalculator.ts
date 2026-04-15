@@ -1,4 +1,5 @@
-import { parseCurrency } from './format';
+import { format, isWithinInterval } from 'date-fns';
+import { parseCurrency, toIsoDate } from './format';
 import { fetchRates } from './fetchRates';
 
 export type Period = {
@@ -8,7 +9,7 @@ export type Period = {
 };
 
 export const formatPeriod = (p: Period): string =>
-    `${p.name}: ${p.start.toLocaleDateString()} - ${p.end.toLocaleDateString()}`;
+    `${p.name}: ${format(p.start, 'P')} - ${format(p.end, 'P')}`;
 
 export const GAIN_FIELD = {
     Period: 'Period',
@@ -83,12 +84,11 @@ type NumericGainKey =
 
 const strToNum = (str: string): number => parseCurrency(str) ?? 0;
 const round2 = (n: number): number => Math.round(n * 100) / 100;
-const toIsoDate = (d: Date): string => d.toISOString().split('T')[0];
 
 const findPeriod = (periods: Period[], date: Date): Period => {
-    const period = periods.find(p => date >= p.start && date <= p.end);
+    const period = periods.find(p => isWithinInterval(date, { start: p.start, end: p.end }));
     if (!period) {
-        throw new Error(`No period found for date: ${date.toISOString()}`);
+        throw new Error(`No period found for date: ${toIsoDate(date)}`);
     }
     return period;
 };
