@@ -1,6 +1,7 @@
 import { Table } from 'react-bootstrap';
 import type { ExchangeRate } from '../utils/GainsCalculator';
 import { formatDate } from '../utils/format';
+import { formatMoney } from '../utils/money';
 
 interface ExchangeRatesTableProps {
     rates: ExchangeRate[];
@@ -24,7 +25,7 @@ const ExchangeRatesTable = ({ rates }: ExchangeRatesTableProps) => {
                     <tr key={r.date}>
                         <td>{formatDate(r.date)}</td>
                         <td className="text-end" style={{ fontFamily: "'Courier New', monospace" }}>
-                            {r.rate.toFixed(4)}
+                            {formatMoney(r.rate, { decimals: 4 })}
                         </td>
                     </tr>
                 ))}

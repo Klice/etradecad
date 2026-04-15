@@ -2,7 +2,8 @@ import { Accordion, Table } from 'react-bootstrap';
 import ExchangeRatesTable from './ExchangeRatesTable';
 import TransactionsTable from './TransactionsTable';
 import { ETRADE_FIELD, type EtradeData, type ExchangeRate, type GainsType, type VerificationData } from '../utils/GainsCalculator';
-import { formatCurrency, parseCurrency } from '../utils/format';
+import { formatCurrency } from '../utils/format';
+import { moneyFromString, subMoney, type Money } from '../utils/money';
 
 interface DataVerificationProps {
     verification: VerificationData;
@@ -14,10 +15,12 @@ interface DataVerificationProps {
 const CheckIcon = () => <span className="verification-check">&#10003;</span>;
 const WarnIcon = () => <span className="verification-warn">&#9888;</span>;
 
+const CROSS_CHECK_TOLERANCE = 20_000n; // 0.02 in scale-6
+
 interface CrossCheckRow {
     label: string;
-    csvValue: number;
-    calculatedValue: number;
+    csvValue: Money;
+    calculatedValue: Money;
 }
 
 const SummaryRow = ({ data }: { data: EtradeData }) => {
@@ -46,7 +49,7 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
     const crossChecks: CrossCheckRow[] = [];
 
     if (summary) {
-        const summaryProceeds = parseCurrency(summary[ETRADE_FIELD.TotalProceeds]);
+        const summaryProceeds = moneyFromString(summary[ETRADE_FIELD.TotalProceeds]);
         if (summaryProceeds !== null) {
             crossChecks.push({
                 label: 'Total Proceeds',
@@ -55,8 +58,8 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
             });
         }
 
-        const summaryGainLoss = parseCurrency(summary[ETRADE_FIELD.AdjustedGainLoss])
-            ?? parseCurrency(summary[ETRADE_FIELD.GainLoss]);
+        const summaryGainLoss = moneyFromString(summary[ETRADE_FIELD.AdjustedGainLoss])
+            ?? moneyFromString(summary[ETRADE_FIELD.GainLoss]);
         if (summaryGainLoss !== null) {
             crossChecks.push({
                 label: 'Adjusted Gain/Loss',
@@ -137,7 +140,8 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
                             </thead>
                             <tbody>
                                 {crossChecks.map((row) => {
-                                    const match = Math.abs(row.csvValue - row.calculatedValue) < 0.02;
+                                    const diff = subMoney(row.csvValue, row.calculatedValue);
+                                    const match = (diff < 0n ? -diff : diff) < CROSS_CHECK_TOLERANCE;
                                     return (
                                         <tr key={row.label}>
                                             <td className="text-muted">{row.label}</td>
