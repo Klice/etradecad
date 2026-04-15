@@ -1,7 +1,7 @@
 import { Table } from 'react-bootstrap';
 import { CSVLink } from 'react-csv';
 import type { GainsType } from '../utils/GainsCalculator';
-import { formatCurrency } from '../utils/currency';
+import { formatCurrency, formatDate } from '../utils/format';
 
 interface TransactionsTableProps {
     data: GainsType[];
@@ -26,6 +26,7 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
                     <tr>
                         <th>#</th>
                         {showPeriod && <th>Period</th>}
+                        <th>Date Sold</th>
                         <th>Description</th>
                         <th className="text-end">Proceeds</th>
                         <th className="text-end">Cost base</th>
@@ -41,6 +42,7 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
                             <tr key={index}>
                                 <td>{index + 1}</td>
                                 {showPeriod && <td>{String(row['Period'])}</td>}
+                                <td>{formatDate(row['Date Sold'] as string)}</td>
                                 <td>{row['Description']}</td>
                                 <td className="text-end">{formatCurrency(row['Proceeds'] as number)}</td>
                                 <td className="text-end">{formatCurrency(row['Cost base'] as number)}</td>

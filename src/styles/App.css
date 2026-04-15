@@ -5,6 +5,18 @@ body {
     background-color: #f4f4f4;
 }
 
+/* Footer */
+.footer-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+
+.footer-link:hover {
+    color: #333;
+}
+
 /* Landing page */
 .landing-container {
     max-width: 680px;
@@ -138,6 +150,18 @@ td.gain-negative,
     color: #ffc107;
     font-weight: bold;
     font-size: 1.1rem;
+}
+
+.verification-badge {
+    display: inline-block;
+    background: #e9ecef;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 1px 8px;
+    border-radius: 10px;
+    min-width: 24px;
+    text-align: center;
 }
 
 .crosscheck-table td,
