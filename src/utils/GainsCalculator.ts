@@ -5,7 +5,7 @@ export interface ResultsType {
     total: GainsType[];
 }
 
-class Period {
+export class Period {
     start: Date;
     end: Date;
     name: string;
@@ -15,13 +15,14 @@ class Period {
         this.name = name;
     }
 
-    public toString = (): string => {
+    public toString(): string {
         return this.name + ": " + this.start.toLocaleDateString() + " - " + this.end.toLocaleDateString();
     }
 }
 
 export interface GainsType {
-    "Period": Period
+    [key: string]: string | number | Period;
+    "Period": Period;
     "Description": string;
     "Proceeds": number;
     "Cost base": number;
@@ -30,6 +31,7 @@ export interface GainsType {
 }
 
 export interface EtradeData {
+    [key: string]: string;
     "Record Type": string;
     "Date Sold": string;
     "Date Acquired": string;
@@ -39,18 +41,15 @@ export interface EtradeData {
     "Plan Type": string;
 }
 
-const periods: Period[] = [
-    new Period(new Date(2024, 1 - 1, 1), new Date(2024, 6 - 1, 24), "Period 1"),
-    new Period(new Date(2024, 6 - 1, 25), new Date(2024, 12 - 1, 31), "Period 2"),
-];
-
 export class GainsCalculator {
     private data: EtradeData[];
     private sales: EtradeData[];
+    private periods: Period[];
 
-    constructor(data: EtradeData[]) {
+    constructor(data: EtradeData[], periods: Period[]) {
         this.data = data;
-        this.sales = this.data.filter(r => r["Record Type"] == "Sell");
+        this.periods = periods;
+        this.sales = this.data.filter(r => r["Record Type"] === "Sell");
     }
 
     private getDates(dateColumn: keyof EtradeData): string[] {
@@ -82,14 +81,14 @@ export class GainsCalculator {
             acc["Expenses"] += row["Expenses"];
             acc["Gain (loss)"] += row["Gain (loss)"];
             return acc;
-        }, <GainsType>({
+        }, {
             "Period": period,
             "Description": "",
             "Proceeds": 0,
             "Cost base": 0,
             "Expenses": 0,
             "Gain (loss)": 0,
-        }));
+        } as GainsType);
 
 
         total["Proceeds"] = this.roundToTwoDecimals(total["Proceeds"]);
@@ -100,7 +99,7 @@ export class GainsCalculator {
     }
 
     private getPeriodForDate(date: Date): Period {
-        const period = periods.find(period => {
+        const period = this.periods.find((period: Period) => {
             return date >= period.start && date <= period.end;
         });
         if (!period) {
@@ -109,7 +108,7 @@ export class GainsCalculator {
         return period;
     }
 
-    public calcualteTax(): Promise<ResultsType> {
+    public calculateTax(): Promise<ResultsType> {
         return this.getFxRates().then(rates => {
             const gains: GainsType[] = [];
             this.sales.forEach(row => {
@@ -119,17 +118,17 @@ export class GainsCalculator {
                 const rateAcquired = rates[dateAcquired.toISOString().split('T')[0]];
                 const proceeds = this.strToNum(row["Total Proceeds"]) * rateSold;
                 const costBase = this.strToNum(row["Adjusted Cost Basis"]) * rateAcquired;
-                gains.push(<GainsType>({
+                gains.push({
                     "Period": this.getPeriodForDate(dateSold),
                     "Description": row["Symbol"] + " " + row["Plan Type"],
                     "Proceeds": this.roundToTwoDecimals(proceeds),
                     "Cost base": this.roundToTwoDecimals(costBase),
                     "Expenses": 0,
                     "Gain (loss)": this.roundToTwoDecimals(proceeds - costBase)
-                }));
+                } as GainsType);
             });
 
-            const total = periods.map(period => {
+            const total = this.periods.map((period: Period) => {
                 return this.getTotalForPeriod(period, gains);
             });
 

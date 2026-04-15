@@ -1,12 +1,11 @@
-import React from 'react';
+import type { ChangeEvent } from 'react';
 
 interface CsvUploaderProps {
     onFileUpload: (file: File) => void;
 }
 
-
-const CsvUploader: React.FC<CsvUploaderProps> = ({ onFileUpload }) => {
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+const CsvUploader = ({ onFileUpload }: CsvUploaderProps) => {
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
         const file = event.target.files?.[0];
         if (file) {
             onFileUpload(file);

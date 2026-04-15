@@ -1,13 +1,13 @@
-import React from 'react';
 import { Table } from 'react-bootstrap';
 import { CSVLink } from 'react-csv';
 
+type DataRow = Record<string, string | number | { toString(): string }>;
+
 interface DataTableProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: Array<any>;
+    data: DataRow[];
 }
 
-const DataTable: React.FC<DataTableProps> = ({ data }) => {
+const DataTable = ({ data }: DataTableProps) => {
     if (!data || data.length === 0) {
         return <div>No data available</div>;
     }
@@ -15,7 +15,6 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
     const headers = Object.keys(data[0]);
 
     return (
-
         <div>
             <div className="mb-3">
                 <CSVLink className="btn btn-info" data={data}>Download CSV</CSVLink>
@@ -34,7 +33,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
                         <tr key={index}>
                             <th>{index + 1}</th>
                             {headers.map((header) => (
-                                <td key={header}>{row[header].toString()}</td>
+                                <td key={header}>{String(row[header])}</td>
                             ))}
                         </tr>
                     ))}

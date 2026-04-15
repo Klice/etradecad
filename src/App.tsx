@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CsvUploader from './components/CsvUploader';
 import { parseCsv } from './utils/csvParser';
-import { EtradeData, GainsCalculator, ResultsType } from './utils/GainsCalculator';
+import { EtradeData, GainsCalculator, Period, ResultsType } from './utils/GainsCalculator';
 import Results from './components/Results';
 import Footer from './components/Footer';
 
-const App: React.FC = () => {
+const periods: Period[] = [
+    new Period(new Date(2025, 0, 1), new Date(2025, 5, 24), 'Period 1'),
+    new Period(new Date(2025, 5, 25), new Date(2025, 11, 31), 'Period 2'),
+];
+
+const App = () => {
     const [data, setData] = useState<EtradeData[]>([]);
     const [results, setResults] = useState<ResultsType>();
 
-    const handleFileUpload = (file: File) => {
-        parseCsv(file).then(parsedData => {
-            setData(parsedData);
-            const calculatedResults = new GainsCalculator(parsedData).calcualteTax();
-            calculatedResults.then((res) => {
-                setResults(res);
-            });
-        });
+    const handleFileUpload = async (file: File) => {
+        const parsedData = await parseCsv(file);
+        setData(parsedData);
+        const calculatedResults = await new GainsCalculator(parsedData, periods).calculateTax();
+        setResults(calculatedResults);
     };
 
     return (
@@ -26,7 +28,6 @@ const App: React.FC = () => {
             <Results data={data} gains={results?.gains} total={results?.total} />
             <Footer />
         </div>
-
     );
 };
 
