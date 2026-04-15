@@ -13,16 +13,18 @@ const formatPeriodDates = (period: Period): string => {
     return `${start} \u2013 ${end}`;
 };
 
-const PeriodBlock = ({ row }: { row: GainsType }) => {
+const PeriodBlock = ({ row, showPeriod }: { row: GainsType; showPeriod: boolean }) => {
     const period = row['Period'] as Period;
     const gainLoss = row['Gain (loss)'] as number;
     const gainClass = gainLoss >= 0 ? 'gain-positive' : 'gain-negative';
 
     return (
         <>
-            <div className="cra-period-title">
-                {period.name} &middot; {formatPeriodDates(period)}
-            </div>
+            {showPeriod && (
+                <div className="cra-period-title">
+                    {period.name} &middot; {formatPeriodDates(period)}
+                </div>
+            )}
             <div className="cra-row">
                 <span className="cra-row-label">Proceeds of disposition</span>
                 <span className="cra-row-value">{formatCurrency(row['Proceeds'] as number)}</span>
@@ -44,11 +46,13 @@ const PeriodBlock = ({ row }: { row: GainsType }) => {
 };
 
 const TaxSummary = ({ totals }: TaxSummaryProps) => {
+    const showPeriod = totals.length > 1;
+
     return (
         <div className="cra-card mb-4">
             <div className="cra-header">Schedule 3 &mdash; Capital Gains (Losses)</div>
             {totals.map((row, i) => (
-                <PeriodBlock key={i} row={row} />
+                <PeriodBlock key={i} row={row} showPeriod={showPeriod} />
             ))}
             <div className="d-flex justify-content-end p-2">
                 <CSVLink className="btn btn-sm btn-outline-primary" data={totals}>
