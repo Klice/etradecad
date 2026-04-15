@@ -6,8 +6,7 @@ import ResultsPage from './components/Results';
 import Footer from './components/Footer';
 
 const periods: Period[] = [
-    new Period(new Date(2025, 0, 1), new Date(2025, 5, 24), 'Period 1'),
-    new Period(new Date(2025, 5, 25), new Date(2025, 11, 31), 'Period 2'),
+    new Period(new Date(2025, 0, 1), new Date(2025, 11, 31), '2025'),
 ];
 
 const App = () => {
