@@ -14,6 +14,7 @@ const mockFetch = (body: unknown, ok = true, status = 200) =>
     );
 
 const obs = (d: string, v: string) => ({ d, FXUSDCAD: { v } });
+const r = (rate: bigint, rateDate: string) => ({ rate, rateDate });
 
 describe('fetchRates', () => {
     afterEach(() => {
@@ -31,8 +32,8 @@ describe('fetchRates', () => {
         const result = await fetchRates([new Date(2025, 2, 10), new Date(2025, 2, 11)]);
 
         expect(result).toEqual({
-            '2025-03-10': 1_374_500n,
-            '2025-03-11': 1_375_000n,
+            '2025-03-10': r(1_374_500n, '2025-03-10'),
+            '2025-03-11': r(1_375_000n, '2025-03-11'),
         });
     });
 
@@ -44,7 +45,7 @@ describe('fetchRates', () => {
         // Sunday — should fall back to Friday
         const result = await fetchRates([new Date(2025, 2, 16)]);
 
-        expect(result).toEqual({ '2025-03-16': 1_400_000n });
+        expect(result).toEqual({ '2025-03-16': r(1_400_000n, '2025-03-14') });
     });
 
     it('returns ZERO when no observation is found even after lookback', async () => {
@@ -53,7 +54,7 @@ describe('fetchRates', () => {
         // date far from any observation
         const result = await fetchRates([new Date(2025, 5, 1)]);
 
-        expect(result).toEqual({ '2025-06-01': 0n });
+        expect(result).toEqual({ '2025-06-01': r(0n, '2025-06-01') });
     });
 
     it('ignores observations without FXUSDCAD field', async () => {
@@ -66,7 +67,7 @@ describe('fetchRates', () => {
 
         const result = await fetchRates([new Date(2025, 2, 10)]);
 
-        expect(result).toEqual({ '2025-03-10': 1_370_000n });
+        expect(result).toEqual({ '2025-03-10': r(1_370_000n, '2025-03-09') });
     });
 
     it('throws on HTTP error', async () => {
@@ -95,6 +96,6 @@ describe('fetchRates', () => {
         const result = await fetchRates([date, date]);
 
         expect(Object.keys(result)).toEqual(['2025-03-10']);
-        expect(result['2025-03-10']).toBe(1_374_500n);
+        expect(result['2025-03-10']).toEqual(r(1_374_500n, '2025-03-10'));
     });
 });
