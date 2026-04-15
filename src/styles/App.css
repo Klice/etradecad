@@ -80,6 +80,12 @@ body {
     opacity: 0.8;
 }
 
+.cra-tooltip .tooltip-inner {
+    max-width: 360px;
+    text-align: left;
+    white-space: pre-line;
+}
+
 .cra-period-title {
     background: #ecf0f1;
     padding: 8px 16px;
