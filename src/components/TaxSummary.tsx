@@ -14,8 +14,8 @@ const formatPeriodDates = (period: Period): string => {
 };
 
 const PeriodBlock = ({ row, showPeriod }: { row: GainsType; showPeriod: boolean }) => {
-    const period = row['Period'] as Period;
-    const gainLoss = row['Gain (loss)'] as number;
+    const period = row['Period'];
+    const gainLoss = row['Gain (loss)'];
     const gainClass = gainLoss >= 0 ? 'gain-positive' : 'gain-negative';
 
     return (
@@ -27,15 +27,15 @@ const PeriodBlock = ({ row, showPeriod }: { row: GainsType; showPeriod: boolean 
             )}
             <div className="cra-row">
                 <span className="cra-row-label">Proceeds of disposition</span>
-                <span className="cra-row-value">{formatCurrency(row['Proceeds'] as number)}</span>
+                <span className="cra-row-value">{formatCurrency(row['Proceeds'])}</span>
             </div>
             <div className="cra-row">
                 <span className="cra-row-label">Adjusted cost base</span>
-                <span className="cra-row-value">{formatCurrency(row['Cost base'] as number)}</span>
+                <span className="cra-row-value">{formatCurrency(row['Cost base'])}</span>
             </div>
             <div className="cra-row">
                 <span className="cra-row-label">Outlays and expenses</span>
-                <span className="cra-row-value">{formatCurrency(row['Expenses'] as number)}</span>
+                <span className="cra-row-value">{formatCurrency(row['Expenses'])}</span>
             </div>
             <div className="cra-row cra-row-highlight">
                 <span className="cra-row-label">Gain (Loss)</span>

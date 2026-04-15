@@ -12,7 +12,7 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
         return <div>No data available</div>;
     }
 
-    const showPeriod = new Set(data.map(r => r['Period'].toString())).size > 1;
+    const showPeriod = new Set(data.map(r => r['Period'].name)).size > 1;
 
     return (
         <div>
@@ -36,17 +36,17 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
                 </thead>
                 <tbody>
                     {data.map((row, index) => {
-                        const gainLoss = row['Gain (loss)'] as number;
+                        const gainLoss = row['Gain (loss)'];
                         const gainClass = gainLoss >= 0 ? 'gain-positive' : 'gain-negative';
                         return (
                             <tr key={index}>
                                 <td>{index + 1}</td>
-                                {showPeriod && <td>{String(row['Period'])}</td>}
-                                <td>{formatDate(row['Date Sold'] as string)}</td>
+                                {showPeriod && <td>{row['Period'].name}</td>}
+                                <td>{formatDate(row['Date Sold'])}</td>
                                 <td>{row['Description']}</td>
-                                <td className="text-end">{formatCurrency(row['Proceeds'] as number)}</td>
-                                <td className="text-end">{formatCurrency(row['Cost base'] as number)}</td>
-                                <td className="text-end">{formatCurrency(row['Expenses'] as number)}</td>
+                                <td className="text-end">{formatCurrency(row['Proceeds'])}</td>
+                                <td className="text-end">{formatCurrency(row['Cost base'])}</td>
+                                <td className="text-end">{formatCurrency(row['Expenses'])}</td>
                                 <td className={`text-end ${gainClass}`}>
                                     {formatCurrency(gainLoss)}
                                 </td>

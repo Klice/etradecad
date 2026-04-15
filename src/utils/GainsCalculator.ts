@@ -1,16 +1,16 @@
 import { parseCurrency } from './format';
-import { ExchangeRateFetcher } from './fetchRates';
+import { fetchRates } from './fetchRates';
 
-export class Period {
-    constructor(public start: Date, public end: Date, public name: string) { }
+export type Period = {
+    start: Date;
+    end: Date;
+    name: string;
+};
 
-    public toString(): string {
-        return `${this.name}: ${this.start.toLocaleDateString()} - ${this.end.toLocaleDateString()}`;
-    }
-}
+export const formatPeriod = (p: Period): string =>
+    `${p.name}: ${p.start.toLocaleDateString()} - ${p.end.toLocaleDateString()}`;
 
 export interface GainsType {
-    [key: string]: string | number | Period;
     'Period': Period;
     'Date Sold': string;
     'Description': string;
@@ -21,7 +21,6 @@ export interface GainsType {
 }
 
 export interface EtradeData {
-    [key: string]: string;
     'Record Type': string;
     'Date Sold': string;
     'Date Acquired': string;
@@ -29,6 +28,8 @@ export interface EtradeData {
     'Adjusted Cost Basis': string;
     'Symbol': string;
     'Plan Type': string;
+    'Adjusted Gain/Loss'?: string;
+    'Gain/Loss'?: string;
 }
 
 export interface VerificationData {
@@ -50,112 +51,97 @@ export interface ResultsType {
     exchangeRates: ExchangeRate[];
 }
 
-export class GainsCalculator {
-    constructor(private sales: EtradeData[], private periods: Period[]) { }
+type NumericGainKey = 'Proceeds' | 'Cost base' | 'Expenses' | 'Gain (loss)';
 
-    private getDates(dateColumn: keyof EtradeData): string[] {
-        return this.sales.map(row => row[dateColumn]);
+const strToNum = (str: string): number => parseCurrency(str) ?? 0;
+const round2 = (n: number): number => Math.round(n * 100) / 100;
+const toIsoDate = (d: Date): string => d.toISOString().split('T')[0];
+
+const findPeriod = (periods: Period[], date: Date): Period => {
+    const period = periods.find(p => date >= p.start && date <= p.end);
+    if (!period) {
+        throw new Error(`No period found for date: ${date.toISOString()}`);
     }
+    return period;
+};
 
-    private getFxRates(): Promise<Record<string, number>> {
-        const allDatesStr = this.getDates('Date Acquired').concat(this.getDates('Date Sold'));
-        const allDates = Array.from(new Set(allDatesStr)).map(date => new Date(date));
-        return new ExchangeRateFetcher().fetchRates(allDates);
-    }
+const buildGain = (
+    row: EtradeData,
+    periods: Period[],
+    rates: Record<string, number>,
+): GainsType => {
+    const dateSold = new Date(row['Date Sold']);
+    const dateAcquired = new Date(row['Date Acquired']);
+    const proceedsUsd = strToNum(row['Total Proceeds']);
+    const costBaseUsd = strToNum(row['Adjusted Cost Basis']);
+    const proceeds = proceedsUsd * rates[toIsoDate(dateSold)];
+    const costBase = costBaseUsd * rates[toIsoDate(dateAcquired)];
 
-    private strToNum(str: string): number {
-        return parseCurrency(str) ?? 0;
-    }
+    return {
+        'Period': findPeriod(periods, dateSold),
+        'Date Sold': row['Date Sold'],
+        'Description': `${row['Symbol']} ${row['Plan Type']}`,
+        'Proceeds': round2(proceeds),
+        'Cost base': round2(costBase),
+        'Expenses': 0,
+        'Gain (loss)': round2(proceeds - costBase),
+    };
+};
 
-    private roundToTwoDecimals(num: number): number {
-        return Math.round(num * 100) / 100;
-    }
+const totalForPeriod = (period: Period, gains: GainsType[]): GainsType => {
+    const inPeriod = gains.filter(g => g.Period === period);
+    const sum = (key: NumericGainKey): number =>
+        round2(inPeriod.reduce((acc, row) => acc + row[key], 0));
 
-    private getTotalForPeriod(period: Period, gains: GainsType[]): GainsType {
-        const total = gains.reduce((acc, row) => {
-            if (row.Period !== period) {
-                return acc;
-            }
-            acc['Proceeds'] += row['Proceeds'];
-            acc['Cost base'] += row['Cost base'];
-            acc['Expenses'] += row['Expenses'];
-            acc['Gain (loss)'] += row['Gain (loss)'];
-            return acc;
-        }, {
-            'Period': period,
-            'Date Sold': '',
-            'Description': '',
-            'Proceeds': 0,
-            'Cost base': 0,
-            'Expenses': 0,
-            'Gain (loss)': 0,
-        } as GainsType);
+    return {
+        'Period': period,
+        'Date Sold': '',
+        'Description': '',
+        'Proceeds': sum('Proceeds'),
+        'Cost base': sum('Cost base'),
+        'Expenses': sum('Expenses'),
+        'Gain (loss)': sum('Gain (loss)'),
+    };
+};
 
-        total['Proceeds'] = this.roundToTwoDecimals(total['Proceeds']);
-        total['Cost base'] = this.roundToTwoDecimals(total['Cost base']);
-        total['Expenses'] = this.roundToTwoDecimals(total['Expenses']);
-        total['Gain (loss)'] = this.roundToTwoDecimals(total['Gain (loss)']);
-        return total;
-    }
+const usdTotals = (sales: EtradeData[]): { usdProceeds: number; usdGainLoss: number } =>
+    sales.reduce(
+        (acc, row) => {
+            const proceeds = strToNum(row['Total Proceeds']);
+            const costBase = strToNum(row['Adjusted Cost Basis']);
+            return {
+                usdProceeds: acc.usdProceeds + proceeds,
+                usdGainLoss: acc.usdGainLoss + (proceeds - costBase),
+            };
+        },
+        { usdProceeds: 0, usdGainLoss: 0 },
+    );
 
-    private getPeriodForDate(date: Date): Period {
-        const period = this.periods.find(p => date >= p.start && date <= p.end);
-        if (!period) {
-            throw new Error(`No period found for date: ${date}`);
-        }
-        return period;
-    }
+export const calculateTax = async (
+    sales: EtradeData[],
+    periods: Period[],
+): Promise<ResultsType> => {
+    const allDateStrs = sales.flatMap(row => [row['Date Acquired'], row['Date Sold']]);
+    const uniqueDateStrs = Array.from(new Set(allDateStrs));
+    const rates = await fetchRates(uniqueDateStrs.map(d => new Date(d)));
 
-    public async calculateTax(): Promise<ResultsType> {
-        const rates = await this.getFxRates();
+    const gains = sales.map(row => buildGain(row, periods, rates));
+    const total = periods.map(p => totalForPeriod(p, gains));
+    const { usdProceeds, usdGainLoss } = usdTotals(sales);
 
-        const allDatesStr = this.getDates('Date Acquired').concat(this.getDates('Date Sold'));
-        const uniqueDates = new Set(allDatesStr).size;
+    const exchangeRates: ExchangeRate[] = Object.entries(rates)
+        .map(([date, rate]) => ({ date, rate }))
+        .sort((a, b) => a.date.localeCompare(b.date));
 
-        let usdProceeds = 0;
-        let usdGainLoss = 0;
-
-        const gains: GainsType[] = [];
-        this.sales.forEach(row => {
-            const dateSold = new Date(row['Date Sold']);
-            const dateAcquired = new Date(row['Date Acquired']);
-            const rateSold = rates[dateSold.toISOString().split('T')[0]];
-            const rateAcquired = rates[dateAcquired.toISOString().split('T')[0]];
-            const proceedsUsd = this.strToNum(row['Total Proceeds']);
-            const costBaseUsd = this.strToNum(row['Adjusted Cost Basis']);
-            const proceeds = proceedsUsd * rateSold;
-            const costBase = costBaseUsd * rateAcquired;
-
-            usdProceeds += proceedsUsd;
-            usdGainLoss += proceedsUsd - costBaseUsd;
-
-            gains.push({
-                'Period': this.getPeriodForDate(dateSold),
-                'Date Sold': row['Date Sold'],
-                'Description': `${row['Symbol']} ${row['Plan Type']}`,
-                'Proceeds': this.roundToTwoDecimals(proceeds),
-                'Cost base': this.roundToTwoDecimals(costBase),
-                'Expenses': 0,
-                'Gain (loss)': this.roundToTwoDecimals(proceeds - costBase),
-            } as GainsType);
-        });
-
-        const total = this.periods.map(period => this.getTotalForPeriod(period, gains));
-
-        const exchangeRates: ExchangeRate[] = Object.entries(rates)
-            .map(([date, rate]) => ({ date, rate }))
-            .sort((a, b) => a.date.localeCompare(b.date));
-
-        return {
-            gains,
-            total,
-            verification: {
-                sellCount: this.sales.length,
-                uniqueDates,
-                usdProceeds: this.roundToTwoDecimals(usdProceeds),
-                usdGainLoss: this.roundToTwoDecimals(usdGainLoss),
-            },
-            exchangeRates,
-        };
-    }
-}
+    return {
+        gains,
+        total,
+        verification: {
+            sellCount: sales.length,
+            uniqueDates: uniqueDateStrs.length,
+            usdProceeds: round2(usdProceeds),
+            usdGainLoss: round2(usdGainLoss),
+        },
+        exchangeRates,
+    };
+};
