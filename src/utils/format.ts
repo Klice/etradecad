@@ -18,3 +18,8 @@ export const formatDate = (value: string): string => {
     if (isNaN(date.getTime())) return value;
     return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
 };
+
+export type GainClass = 'gain-positive' | 'gain-negative';
+
+export const gainClass = (value: number): GainClass =>
+    value >= 0 ? 'gain-positive' : 'gain-negative';

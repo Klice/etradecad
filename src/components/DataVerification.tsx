@@ -1,7 +1,7 @@
 import { Accordion, Table } from 'react-bootstrap';
 import ExchangeRatesTable from './ExchangeRatesTable';
 import TransactionsTable from './TransactionsTable';
-import type { EtradeData, ExchangeRate, GainsType, VerificationData } from '../utils/GainsCalculator';
+import { ETRADE_FIELD, type EtradeData, type ExchangeRate, type GainsType, type VerificationData } from '../utils/GainsCalculator';
 import { formatCurrency, parseCurrency } from '../utils/format';
 
 interface DataVerificationProps {
@@ -46,7 +46,7 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
     const crossChecks: CrossCheckRow[] = [];
 
     if (summary) {
-        const summaryProceeds = parseCurrency(summary['Total Proceeds']);
+        const summaryProceeds = parseCurrency(summary[ETRADE_FIELD.TotalProceeds]);
         if (summaryProceeds !== null) {
             crossChecks.push({
                 label: 'Total Proceeds',
@@ -55,8 +55,8 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
             });
         }
 
-        const summaryGainLoss = parseCurrency(summary['Adjusted Gain/Loss'])
-            ?? parseCurrency(summary['Gain/Loss']);
+        const summaryGainLoss = parseCurrency(summary[ETRADE_FIELD.AdjustedGainLoss])
+            ?? parseCurrency(summary[ETRADE_FIELD.GainLoss]);
         if (summaryGainLoss !== null) {
             crossChecks.push({
                 label: 'Adjusted Gain/Loss',
