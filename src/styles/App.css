@@ -22,6 +22,11 @@ body {
     max-width: 680px;
 }
 
+.landing-container h1,
+.landing-container .fs-5 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
 .instructions-card {
     background: #fff;
     border-left: 4px solid #0d6efd;
