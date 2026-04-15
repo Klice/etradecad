@@ -18,9 +18,9 @@ const LandingPage = ({ onFileSelect }: LandingPageProps) => {
                     <ol className="mb-0">
                         <li className="mb-2">Log in to <strong>us.etrade.com</strong></li>
                         <li className="mb-2">Navigate to <strong>Stock Plan</strong> &rarr; <strong>My Account</strong> &rarr; <strong>Gains &amp; Losses</strong></li>
-                        <li className="mb-2">Select the tax year</li>
-                        <li className="mb-2">Click <strong>&quot;Collapse All&quot;</strong> to group transactions</li>
-                        <li className="mb-0">Click <strong>&quot;Download Expanded&quot;</strong> and choose CSV format</li>
+                        <li className="mb-2">Select the tax year and click <strong>&quot;Apply&quot;</strong></li>
+                        <li className="mb-2">Click the <strong>&quot;Download&quot;</strong> dropdown</li>
+                        <li className="mb-0">Select <strong>&quot;Download Expanded&quot;</strong> to save the file (.xlsx)</li>
                     </ol>
                 </div>
             </div>
