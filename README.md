@@ -1,32 +1,39 @@
-# React CSV App
+# eTrade Gains/Losses USD to CAD Converter
 
-This is a single-page React application that allows users to upload a CSV file, perform calculations on the data, and display the results in a table format.
+A single-page application that converts eTrade gain/loss reports from USD to CAD using Bank of Canada exchange rates.
 
 ## Features
 
-- Upload CSV files
-- Parse and process CSV data
-- Display results in a tabular format
+- Upload eTrade Gain/Loss CSV exports
+- Automatically fetch USD/CAD exchange rates from the Bank of Canada
+- Calculate gains/losses in CAD grouped by configurable tax periods
+- Export results as CSV
+
+## Tech Stack
+
+- **React** 19 with **TypeScript** 5
+- **Vite** 6 — build tool and dev server
+- **React Bootstrap** 2 — UI components
+- **PapaParse** — CSV parsing
+- **react-csv** — CSV export
+
+## Prerequisites
+
+- Node.js 20+
+- npm 10+
 
 ## Getting Started
-
-### Prerequisites
-
-- Node.js (v14 or later)
-- npm (v6 or later)
-
-### Installation
 
 1. Clone the repository:
 
    ```
-   git clone <repository-url>
+   git clone https://github.com/Klice/etradecad.git
    ```
 
 2. Navigate to the project directory:
 
    ```
-   cd react-csv-app
+   cd etradecad
    ```
 
 3. Install the dependencies:
@@ -53,13 +60,14 @@ To create a production build, run:
 npm run build
 ```
 
-This will generate a `build` folder with the optimized application.
+This will generate a `dist` folder with the optimized application.
 
 ## Usage
 
-1. Click on the "Upload CSV" button to select a CSV file from your computer.
-2. The application will parse the CSV data and perform the necessary calculations.
-3. Results will be displayed in a table format.
+1. Export your Gain/Loss report from eTrade as a CSV file.
+2. Upload the CSV file using the file input.
+3. The app fetches exchange rates and calculates gains/losses in CAD.
+4. Review results by period or download as CSV.
 
 ## Contributing
 

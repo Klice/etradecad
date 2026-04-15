@@ -1,4 +1,3 @@
-import React from 'react';
 import { Accordion, Stack } from 'react-bootstrap';
 import DataTable from './DataTable';
 import { EtradeData, GainsType } from '../utils/GainsCalculator';
@@ -9,7 +8,7 @@ interface ResultsProps {
     total: GainsType[] | undefined;
 }
 
-const Results: React.FC<ResultsProps> = ({ data, gains, total }) => {
+const Results = ({ data, gains, total }: ResultsProps) => {
     if (!data || data.length === 0) {
         return <div>No data available</div>;
     }

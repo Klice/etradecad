@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-interface Obeservation {
+interface Observation {
     d: string; // Date in 'YYYY-MM-DD' format
     FXUSDCAD?: {
         v: string; // Conversion rate
@@ -21,8 +19,11 @@ export class ExchangeRateFetcher {
      */
     public async fetchRates(dates: Date[]): Promise<Record<string, number>> {
         try {
-            const response = await axios.get(this.apiUrl);
-            const data = response.data as { observations: { d: string; FXUSDCAD?: { v: string } }[] };
+            const response = await fetch(this.apiUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+            const data = await response.json() as { observations: { d: string; FXUSDCAD?: { v: string } }[] };
             const observations = data.observations;
 
             const rates: Record<string, number> = {};
@@ -46,11 +47,11 @@ export class ExchangeRateFetcher {
         }
     }
 
-    private findObservationByDate(observations: Obeservation[], date: Date): Obeservation | undefined {
+    private findObservationByDate(observations: Observation[], date: Date): Observation | undefined {
         return observations.find((obs) => obs.d === date.toISOString().split('T')[0]);
     }
 
-    private findObservationByDateWithLookback(observations: Obeservation[], date: Date): Obeservation | undefined {
+    private findObservationByDateWithLookback(observations: Observation[], date: Date): Observation | undefined {
         const maxlookbackDays = 2; // Number of days to look back
         let lookbackDays = 0;
         while (lookbackDays <= maxlookbackDays) {
