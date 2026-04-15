@@ -5,18 +5,136 @@ body {
     background-color: #f4f4f4;
 }
 
-.container {
-    width: 80%;
-    margin: auto;
+/* Landing page */
+.landing-container {
+    max-width: 680px;
+}
+
+.instructions-card {
+    background: #fff;
+    border-left: 4px solid #0d6efd;
+}
+
+/* Drop zone */
+.drop-zone {
+    border: 2px dashed #6c757d;
+    border-radius: 12px;
+    padding: 60px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    background: #fafafa;
+    margin-bottom: 2rem;
+}
+
+.drop-zone:hover,
+.drop-zone-active {
+    border-color: #0d6efd;
+    background: #f0f6ff;
+}
+
+.drop-zone-icon {
+    font-size: 48px;
+    color: #6c757d;
+}
+
+/* Results page */
+.results-container {
+    max-width: 780px;
+}
+
+/* CRA-style tax summary */
+.cra-card {
+    border: 2px solid #333;
+    border-radius: 0;
+    background: #fff;
     overflow: hidden;
 }
 
-h1 {
-    text-align: center;
-    color: #333;
+.cra-header {
+    background: #2c3e50;
+    color: #fff;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 1.1rem;
 }
 
-.upload-section {
-    margin: 20px 0;
-    text-align: center;
+.cra-period-title {
+    background: #ecf0f1;
+    padding: 8px 16px;
+    font-weight: 600;
+    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+}
+
+.cra-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cra-row:last-child {
+    border-bottom: none;
+}
+
+.cra-row-label {
+    color: #555;
+}
+
+.cra-row-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+    text-align: right;
+    min-width: 140px;
+}
+
+.cra-row-highlight {
+    background: #f8f9fa;
+    font-weight: 700;
+}
+
+.cra-row-highlight .cra-row-label {
+    color: #000;
+    font-weight: 700;
+}
+
+.gain-positive {
+    color: #198754;
+}
+
+.gain-negative {
+    color: #dc3545;
+}
+
+/* Data verification */
+.verification-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+}
+
+.verification-check {
+    color: #198754;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.verification-warn {
+    color: #ffc107;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.crosscheck-table td,
+.crosscheck-table th {
+    padding: 6px 12px;
+    font-family: 'Courier New', monospace;
+}
+
+.crosscheck-table th {
+    font-weight: 600;
+    color: #555;
+    font-family: inherit;
 }

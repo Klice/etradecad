@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import CsvUploader from './components/CsvUploader';
-import { parseCsv } from './utils/csvParser';
-import { EtradeData, GainsCalculator, Period, ResultsType } from './utils/GainsCalculator';
-import Results from './components/Results';
+import { parseCsv, type ParseResult } from './utils/csvParser';
+import { GainsCalculator, Period, type EtradeData, type ResultsType } from './utils/GainsCalculator';
+import LandingPage from './components/LandingPage';
+import ResultsPage from './components/Results';
 import Footer from './components/Footer';
 
 const periods: Period[] = [
@@ -11,21 +11,28 @@ const periods: Period[] = [
 ];
 
 const App = () => {
-    const [data, setData] = useState<EtradeData[]>([]);
-    const [results, setResults] = useState<ResultsType>();
+    const [results, setResults] = useState<ResultsType | null>(null);
+    const [summary, setSummary] = useState<EtradeData | null>(null);
 
-    const handleFileUpload = async (file: File) => {
-        const parsedData = await parseCsv(file);
-        setData(parsedData);
-        const calculatedResults = await new GainsCalculator(parsedData, periods).calculateTax();
-        setResults(calculatedResults);
+    const handleFileSelect = async (file: File) => {
+        const parsed: ParseResult = await parseCsv(file);
+        setSummary(parsed.summary);
+        const calculated = await new GainsCalculator(parsed.sales, periods).calculateTax();
+        setResults(calculated);
+    };
+
+    const handleReset = () => {
+        setResults(null);
+        setSummary(null);
     };
 
     return (
         <div className="App">
-            <h1>eTrade Gains/Losses USD to CAD converter</h1>
-            <CsvUploader onFileUpload={handleFileUpload} />
-            <Results data={data} gains={results?.gains} total={results?.total} />
+            {results ? (
+                <ResultsPage results={results} summary={summary} onReset={handleReset} />
+            ) : (
+                <LandingPage onFileSelect={handleFileSelect} />
+            )}
             <Footer />
         </div>
     );
