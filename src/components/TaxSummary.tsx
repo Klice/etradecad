@@ -1,6 +1,6 @@
 import { CSVLink } from 'react-csv';
 import type { GainsType, Period } from '../utils/GainsCalculator';
-import { formatCurrency } from '../utils/currency';
+import { formatCurrency } from '../utils/format';
 
 interface TaxSummaryProps {
     totals: GainsType[];

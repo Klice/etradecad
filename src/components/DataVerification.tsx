@@ -2,7 +2,7 @@ import { Accordion, Table } from 'react-bootstrap';
 import ExchangeRatesTable from './ExchangeRatesTable';
 import TransactionsTable from './TransactionsTable';
 import type { EtradeData, ExchangeRate, GainsType, VerificationData } from '../utils/GainsCalculator';
-import { formatCurrency, parseCurrency } from '../utils/currency';
+import { formatCurrency, parseCurrency } from '../utils/format';
 
 interface DataVerificationProps {
     verification: VerificationData;
@@ -73,12 +73,12 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
 
                 <div className="verification-item">
                     <CheckIcon />
-                    <span>{verification.sellCount} sell transactions loaded</span>
+                    <span><span className="verification-badge">{verification.sellCount}</span> sell transactions loaded</span>
                 </div>
                 <Accordion className="ms-4 mb-2">
                     <Accordion.Item eventKey="txn">
                         <Accordion.Header>
-                            All Transactions ({gains.length})
+                            All Transactions <span className="verification-badge">{gains.length}</span>
                         </Accordion.Header>
                         <Accordion.Body>
                             <TransactionsTable data={gains} />
@@ -90,7 +90,7 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
                     <>
                         <div className="verification-item">
                             <CheckIcon />
-                            <span>1 summary row found</span>
+                            <span><span className="verification-badge">1</span> summary row found</span>
                         </div>
                         <Accordion className="ms-4 mb-2">
                             <Accordion.Item eventKey="summary">
@@ -107,12 +107,12 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
 
                 <div className="verification-item">
                     <CheckIcon />
-                    <span>Exchange rates fetched for {verification.uniqueDates} unique dates</span>
+                    <span>Exchange rates fetched for <span className="verification-badge">{verification.uniqueDates}</span> unique dates</span>
                 </div>
                 <Accordion className="ms-4 mb-2">
                     <Accordion.Item eventKey="rates">
                         <Accordion.Header>
-                            Exchange Rates ({exchangeRates.length})
+                            Exchange Rates <span className="verification-badge">{exchangeRates.length}</span>
                         </Accordion.Header>
                         <Accordion.Body>
                             <ExchangeRatesTable rates={exchangeRates} />

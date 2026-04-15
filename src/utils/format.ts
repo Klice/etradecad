@@ -12,3 +12,9 @@ export const parseCurrency = (str: string | undefined): number | null => {
     const value = parseFloat(str.replace(/[$,]/g, ''));
     return isNaN(value) ? null : value;
 };
+
+export const formatDate = (value: string): string => {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return value;
+    return date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+};

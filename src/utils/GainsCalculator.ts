@@ -1,4 +1,4 @@
-import { parseCurrency } from './currency';
+import { parseCurrency } from './format';
 import { ExchangeRateFetcher } from './fetchRates';
 
 export class Period {
@@ -19,6 +19,7 @@ export class Period {
 export interface GainsType {
     [key: string]: string | number | Period;
     'Period': Period;
+    'Date Sold': string;
     'Description': string;
     'Proceeds': number;
     'Cost base': number;
@@ -95,6 +96,7 @@ export class GainsCalculator {
             return acc;
         }, {
             'Period': period,
+            'Date Sold': '',
             'Description': '',
             'Proceeds': 0,
             'Cost base': 0,
@@ -144,6 +146,7 @@ export class GainsCalculator {
 
             gains.push({
                 'Period': this.getPeriodForDate(dateSold),
+                'Date Sold': row['Date Sold'],
                 'Description': row['Symbol'] + ' ' + row['Plan Type'],
                 'Proceeds': this.roundToTwoDecimals(proceeds),
                 'Cost base': this.roundToTwoDecimals(costBase),
