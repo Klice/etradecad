@@ -2,17 +2,10 @@ import { parseCurrency } from './format';
 import { ExchangeRateFetcher } from './fetchRates';
 
 export class Period {
-    start: Date;
-    end: Date;
-    name: string;
-    constructor(start: Date, end: Date, name: string) {
-        this.start = start;
-        this.end = end;
-        this.name = name;
-    }
+    constructor(public start: Date, public end: Date, public name: string) { }
 
     public toString(): string {
-        return this.name + ': ' + this.start.toLocaleDateString() + ' - ' + this.end.toLocaleDateString();
+        return `${this.name}: ${this.start.toLocaleDateString()} - ${this.end.toLocaleDateString()}`;
     }
 }
 
@@ -58,13 +51,7 @@ export interface ResultsType {
 }
 
 export class GainsCalculator {
-    private sales: EtradeData[];
-    private periods: Period[];
-
-    constructor(sales: EtradeData[], periods: Period[]) {
-        this.sales = sales;
-        this.periods = periods;
-    }
+    constructor(private sales: EtradeData[], private periods: Period[]) { }
 
     private getDates(dateColumn: keyof EtradeData): string[] {
         return this.sales.map(row => row[dateColumn]);
@@ -112,9 +99,7 @@ export class GainsCalculator {
     }
 
     private getPeriodForDate(date: Date): Period {
-        const period = this.periods.find((p: Period) => {
-            return date >= p.start && date <= p.end;
-        });
+        const period = this.periods.find(p => date >= p.start && date <= p.end);
         if (!period) {
             throw new Error(`No period found for date: ${date}`);
         }
@@ -147,7 +132,7 @@ export class GainsCalculator {
             gains.push({
                 'Period': this.getPeriodForDate(dateSold),
                 'Date Sold': row['Date Sold'],
-                'Description': row['Symbol'] + ' ' + row['Plan Type'],
+                'Description': `${row['Symbol']} ${row['Plan Type']}`,
                 'Proceeds': this.roundToTwoDecimals(proceeds),
                 'Cost base': this.roundToTwoDecimals(costBase),
                 'Expenses': 0,
@@ -155,9 +140,7 @@ export class GainsCalculator {
             } as GainsType);
         });
 
-        const total = this.periods.map((period: Period) => {
-            return this.getTotalForPeriod(period, gains);
-        });
+        const total = this.periods.map(period => this.getTotalForPeriod(period, gains));
 
         const exchangeRates: ExchangeRate[] = Object.entries(rates)
             .map(([date, rate]) => ({ date, rate }))
