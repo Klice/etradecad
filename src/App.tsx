@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { parseXls, type ParseResult } from './utils/xlsParser';
-import { GainsCalculator, Period, type EtradeData, type ResultsType } from './utils/GainsCalculator';
+import { calculateTax, type EtradeData, type Period, type ResultsType } from './utils/GainsCalculator';
 import LandingPage from './components/LandingPage';
 import ResultsPage from './components/Results';
 import Footer from './components/Footer';
 
 const periods: Period[] = [
-    new Period(new Date(2025, 0, 1), new Date(2025, 11, 31), '2025'),
+    { start: new Date(2025, 0, 1), end: new Date(2025, 11, 31), name: '2025' },
 ];
 
 const App = () => {
@@ -16,7 +16,7 @@ const App = () => {
     const handleFileSelect = async (file: File) => {
         const parsed: ParseResult = await parseXls(file);
         setSummary(parsed.summary);
-        const calculated = await new GainsCalculator(parsed.sales, periods).calculateTax();
+        const calculated = await calculateTax(parsed.sales, periods);
         setResults(calculated);
     };
 

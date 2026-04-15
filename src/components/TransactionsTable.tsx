@@ -1,7 +1,7 @@
 import { Table } from 'react-bootstrap';
 import { CSVLink } from 'react-csv';
-import type { GainsType } from '../utils/GainsCalculator';
-import { formatCurrency, formatDate } from '../utils/format';
+import { GAIN_FIELD, type GainsType } from '../utils/GainsCalculator';
+import { formatCurrency, formatDate, gainClass } from '../utils/format';
 
 interface TransactionsTableProps {
     data: GainsType[];
@@ -12,7 +12,7 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
         return <div>No data available</div>;
     }
 
-    const showPeriod = new Set(data.map(r => r['Period'].toString())).size > 1;
+    const showPeriod = new Set(data.map(r => r[GAIN_FIELD.Period].name)).size > 1;
 
     return (
         <div>
@@ -36,18 +36,17 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
                 </thead>
                 <tbody>
                     {data.map((row, index) => {
-                        const gainLoss = row['Gain (loss)'] as number;
-                        const gainClass = gainLoss >= 0 ? 'gain-positive' : 'gain-negative';
+                        const gainLoss = row[GAIN_FIELD.GainLoss];
                         return (
                             <tr key={index}>
                                 <td>{index + 1}</td>
-                                {showPeriod && <td>{String(row['Period'])}</td>}
-                                <td>{formatDate(row['Date Sold'] as string)}</td>
-                                <td>{row['Description']}</td>
-                                <td className="text-end">{formatCurrency(row['Proceeds'] as number)}</td>
-                                <td className="text-end">{formatCurrency(row['Cost base'] as number)}</td>
-                                <td className="text-end">{formatCurrency(row['Expenses'] as number)}</td>
-                                <td className={`text-end ${gainClass}`}>
+                                {showPeriod && <td>{row[GAIN_FIELD.Period].name}</td>}
+                                <td>{formatDate(row[GAIN_FIELD.DateSold])}</td>
+                                <td>{row[GAIN_FIELD.Description]}</td>
+                                <td className="text-end">{formatCurrency(row[GAIN_FIELD.Proceeds])}</td>
+                                <td className="text-end">{formatCurrency(row[GAIN_FIELD.CostBase])}</td>
+                                <td className="text-end">{formatCurrency(row[GAIN_FIELD.Expenses])}</td>
+                                <td className={`text-end ${gainClass(gainLoss)}`}>
                                     {formatCurrency(gainLoss)}
                                 </td>
                             </tr>

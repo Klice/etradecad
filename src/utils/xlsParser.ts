@@ -1,5 +1,5 @@
 import readXlsxFile, { type Row } from 'read-excel-file/browser';
-import type { EtradeData } from './GainsCalculator';
+import { ETRADE_FIELD, type EtradeData } from './GainsCalculator';
 
 export interface ParseResult {
     sales: EtradeData[];
@@ -20,11 +20,13 @@ export const parseXls = async (file: File): Promise<ParseResult> => {
     const dataRows = rows.slice(1);
 
     const allRows = dataRows.map(row =>
-        Object.fromEntries(headers.map((header, i) => [header, row[i] != null ? String(row[i]) : '']))
-    ) as EtradeData[];
+        Object.fromEntries(
+            headers.map((header, i) => [header, row[i] != null ? String(row[i]) : '']),
+        ) as unknown as EtradeData,
+    );
 
-    const summary = allRows.find(r => r['Record Type'] === 'Summary') ?? null;
-    const sales = allRows.filter(r => r['Record Type'] === 'Sell');
+    const summary = allRows.find(r => r[ETRADE_FIELD.RecordType] === 'Summary') ?? null;
+    const sales = allRows.filter(r => r[ETRADE_FIELD.RecordType] === 'Sell');
 
     return {
         sales,

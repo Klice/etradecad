@@ -1,22 +1,18 @@
+import { format } from 'date-fns';
 import { CSVLink } from 'react-csv';
-import type { GainsType, Period } from '../utils/GainsCalculator';
-import { formatCurrency } from '../utils/format';
+import { GAIN_FIELD, type GainsType, type Period } from '../utils/GainsCalculator';
+import { formatCurrency, gainClass } from '../utils/format';
 
 interface TaxSummaryProps {
     totals: GainsType[];
 }
 
-const formatPeriodDates = (period: Period): string => {
-    const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    const start = period.start.toLocaleDateString('en-CA', opts);
-    const end = period.end.toLocaleDateString('en-CA', { ...opts, year: 'numeric' });
-    return `${start} \u2013 ${end}`;
-};
+const formatPeriodDates = (period: Period): string =>
+    `${format(period.start, 'MMM d')} \u2013 ${format(period.end, 'MMM d, yyyy')}`;
 
 const PeriodBlock = ({ row, showPeriod }: { row: GainsType; showPeriod: boolean }) => {
-    const period = row['Period'] as Period;
-    const gainLoss = row['Gain (loss)'] as number;
-    const gainClass = gainLoss >= 0 ? 'gain-positive' : 'gain-negative';
+    const period = row[GAIN_FIELD.Period];
+    const gainLoss = row[GAIN_FIELD.GainLoss];
 
     return (
         <>
@@ -27,19 +23,19 @@ const PeriodBlock = ({ row, showPeriod }: { row: GainsType; showPeriod: boolean 
             )}
             <div className="cra-row">
                 <span className="cra-row-label">Proceeds of disposition</span>
-                <span className="cra-row-value">{formatCurrency(row['Proceeds'] as number)}</span>
+                <span className="cra-row-value">{formatCurrency(row[GAIN_FIELD.Proceeds])}</span>
             </div>
             <div className="cra-row">
                 <span className="cra-row-label">Adjusted cost base</span>
-                <span className="cra-row-value">{formatCurrency(row['Cost base'] as number)}</span>
+                <span className="cra-row-value">{formatCurrency(row[GAIN_FIELD.CostBase])}</span>
             </div>
             <div className="cra-row">
                 <span className="cra-row-label">Outlays and expenses</span>
-                <span className="cra-row-value">{formatCurrency(row['Expenses'] as number)}</span>
+                <span className="cra-row-value">{formatCurrency(row[GAIN_FIELD.Expenses])}</span>
             </div>
             <div className="cra-row cra-row-highlight">
                 <span className="cra-row-label">Gain (Loss)</span>
-                <span className={`cra-row-value ${gainClass}`}>{formatCurrency(gainLoss)}</span>
+                <span className={`cra-row-value ${gainClass(gainLoss)}`}>{formatCurrency(gainLoss)}</span>
             </div>
         </>
     );

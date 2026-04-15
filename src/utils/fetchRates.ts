@@ -1,64 +1,44 @@
+import { subDays } from 'date-fns';
+import { toIsoDate } from './format';
+
 interface Observation {
-    d: string; // Date in 'YYYY-MM-DD' format
-    FXUSDCAD?: {
-        v: string; // Conversion rate
-    };
+    d: string;
+    FXUSDCAD?: { v: string };
 }
 
-export class ExchangeRateFetcher {
-    private apiUrl = 'https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json';
+const API_URL = 'https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json';
+const MAX_LOOKBACK_DAYS = 2;
 
-    /**
-     * Fetches conversion rates for a list of dates.
-     * @param dates - An array of dates in the format 'YYYY-MM-DD'.
-     * @returns A promise that resolves to an object where keys are dates and values are conversion rates.
-     */
-    public async fetchRates(dates: Date[]): Promise<Record<string, number>> {
-        try {
-            const response = await fetch(this.apiUrl);
-            if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status}`);
-            }
-            const data = await response.json() as { observations: { d: string; FXUSDCAD?: { v: string } }[] };
-            const observations = data.observations;
+const findObservation = (observations: Observation[], date: Date): Observation | undefined => {
+    const target = toIsoDate(date);
+    return observations.find(obs => obs.d === target);
+};
 
-            const rates: Record<string, number> = {};
-            dates.forEach(date => {
-                const dateStr = date.toISOString().split('T')[0];
-                const observation = this.findObservationByDateWithLookback(observations, date);
-                if (observation && observation['FXUSDCAD']) {
-                    rates[dateStr] = parseFloat(observation['FXUSDCAD'].v);
-                } else {
-                    rates[dateStr] = NaN; // If no rate is found for the date, set it to NaN
-                }
-            });
+const findWithLookback = (observations: Observation[], date: Date): Observation | undefined => {
+    for (let days = 0; days <= MAX_LOOKBACK_DAYS; days++) {
+        const observation = findObservation(observations, subDays(date, days));
+        if (observation?.FXUSDCAD) return observation;
+    }
+    return undefined;
+};
 
-            return rates;
-        } catch (error) {
-            if (error instanceof Error) {
-                throw new Error(`Failed to fetch exchange rates: ${error.message}`);
-            } else {
-                throw new Error('Failed to fetch exchange rates: An unknown error occurred.');
-            }
+export const fetchRates = async (dates: Date[]): Promise<Record<string, number>> => {
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
         }
-    }
+        const data = await response.json() as { observations: Observation[] };
 
-    private findObservationByDate(observations: Observation[], date: Date): Observation | undefined {
-        return observations.find((obs) => obs.d === date.toISOString().split('T')[0]);
+        return Object.fromEntries(
+            dates.map(date => {
+                const observation = findWithLookback(data.observations, date);
+                const rate = observation?.FXUSDCAD ? parseFloat(observation.FXUSDCAD.v) : NaN;
+                return [toIsoDate(date), rate];
+            }),
+        );
+    } catch (error) {
+        const msg = error instanceof Error ? error.message : 'An unknown error occurred.';
+        throw new Error(`Failed to fetch exchange rates: ${msg}`);
     }
-
-    private findObservationByDateWithLookback(observations: Observation[], date: Date): Observation | undefined {
-        const maxlookbackDays = 2; // Number of days to look back
-        let lookbackDays = 0;
-        while (lookbackDays <= maxlookbackDays) {
-            const lookbackDate = new Date(date);
-            lookbackDate.setDate(date.getDate() - lookbackDays);
-            const observation = this.findObservationByDate(observations, lookbackDate);
-            if (observation && observation['FXUSDCAD']) {
-                return observation;
-            }
-            lookbackDays++;
-        }
-        return undefined;
-    }
-}
+};

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
+    "date-fns": "^4.1.0",
     "react": "^19.2.5",
     "react-bootstrap": "^2.10.10",
     "react-csv": "^2.2.2",
