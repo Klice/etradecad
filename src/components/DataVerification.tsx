@@ -1,4 +1,5 @@
 import { Accordion, Table } from 'react-bootstrap';
+import { CheckLg, ExclamationTriangleFill } from 'react-bootstrap-icons';
 import ExchangeRatesTable from './ExchangeRatesTable';
 import TransactionsTable from './TransactionsTable';
 import { ETRADE_FIELD, type EtradeData, type ExchangeRate, type GainsType, type VerificationData } from '../utils/GainsCalculator';
@@ -12,8 +13,8 @@ interface DataVerificationProps {
     gains: GainsType[];
 }
 
-const CheckIcon = () => <span className="verification-check">&#10003;</span>;
-const WarnIcon = () => <span className="verification-warn">&#9888;</span>;
+const CheckIcon = () => <CheckLg className="verification-check" />;
+const WarnIcon = () => <ExclamationTriangleFill className="verification-warn" />;
 
 const CROSS_CHECK_TOLERANCE = 20_000n; // 0.02 in scale-6
 

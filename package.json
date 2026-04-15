@@ -15,6 +15,7 @@
     "date-fns": "^4.1.0",
     "react": "^19.2.5",
     "react-bootstrap": "^2.10.10",
+    "react-bootstrap-icons": "^1.11.6",
     "react-csv": "^2.2.2",
     "react-dom": "^19.2.5",
     "read-excel-file": "^8.0.3"
