@@ -2,3 +2,4 @@ node_modules
 dist
 *.tsbuildinfo
 mockups
+.DS_Store

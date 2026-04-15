@@ -1,4 +1,5 @@
 import { useRef, useState, type DragEvent, type ChangeEvent } from 'react';
+import { FileEarmarkArrowUp } from 'react-bootstrap-icons';
 
 interface FileDropZoneProps {
     onFileSelect: (file: File) => void;
@@ -46,7 +47,7 @@ const FileDropZone = ({ onFileSelect }: FileDropZoneProps) => {
             onDrop={handleDrop}
             onClick={handleClick}
         >
-            <div className="drop-zone-icon">&#128196;</div>
+            <div className="drop-zone-icon"><FileEarmarkArrowUp size={48} /></div>
             <p className="fs-5 mb-1">Drag &amp; drop your Excel file here</p>
             <p className="text-muted small mb-1">.xls and .xlsx supported</p>
             <p className="text-muted mb-0">or click to browse</p>
