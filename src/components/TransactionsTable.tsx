@@ -10,6 +10,7 @@ interface TransactionsTableProps {
 
 const toCsvRow = (row: GainsType) => ({
     [GAIN_FIELD.Period]: row[GAIN_FIELD.Period].name,
+    [GAIN_FIELD.DateAcquired]: row[GAIN_FIELD.DateAcquired],
     [GAIN_FIELD.DateSold]: row[GAIN_FIELD.DateSold],
     [GAIN_FIELD.Description]: row[GAIN_FIELD.Description],
     [GAIN_FIELD.Proceeds]: formatMoney(row[GAIN_FIELD.Proceeds]),
@@ -37,6 +38,7 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
                     <tr>
                         <th>#</th>
                         {showPeriod && <th>Period</th>}
+                        <th>Date Acquired</th>
                         <th>Date Sold</th>
                         <th>Description</th>
                         <th className="text-end">Proceeds</th>
@@ -50,8 +52,9 @@ const TransactionsTable = ({ data }: TransactionsTableProps) => {
                         const gainLoss = row[GAIN_FIELD.GainLoss];
                         return (
                             <tr key={index}>
-                                <td>{index + 1}</td>
+                                <td className="text-muted">{index + 1}</td>
                                 {showPeriod && <td>{row[GAIN_FIELD.Period].name}</td>}
+                                <td>{formatDate(row[GAIN_FIELD.DateAcquired])}</td>
                                 <td>{formatDate(row[GAIN_FIELD.DateSold])}</td>
                                 <td>{row[GAIN_FIELD.Description]}</td>
                                 <td className="text-end">{formatCurrency(row[GAIN_FIELD.Proceeds])}</td>

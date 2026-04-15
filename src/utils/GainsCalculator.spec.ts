@@ -43,8 +43,9 @@ const sale = (opts: {
     [ETRADE_FIELD.PlanType]: opts.plan ?? 'RS',
 });
 
-const gain = (period: Period, dateSold: string, proceeds: bigint, costBase: bigint): GainsType => ({
+const gain = (period: Period, dateAcquired: string, dateSold: string, proceeds: bigint, costBase: bigint): GainsType => ({
     [GAIN_FIELD.Period]: period,
+    [GAIN_FIELD.DateAcquired]: dateAcquired,
     [GAIN_FIELD.DateSold]: dateSold,
     [GAIN_FIELD.Description]: 'ACME RS',
     [GAIN_FIELD.Proceeds]: proceeds,
@@ -55,6 +56,7 @@ const gain = (period: Period, dateSold: string, proceeds: bigint, costBase: bigi
 
 const totalRow = (period: Period, proceeds: bigint, costBase: bigint, gainLoss: bigint): GainsType => ({
     [GAIN_FIELD.Period]: period,
+    [GAIN_FIELD.DateAcquired]: '',
     [GAIN_FIELD.DateSold]: '',
     [GAIN_FIELD.Description]: '',
     [GAIN_FIELD.Proceeds]: proceeds,
@@ -92,10 +94,10 @@ describe('calculateTax (integration)', () => {
 
         const expected: ResultsType = {
             gains: [
-                gain(q1, '02/10/2025', 1_430_000_000n, 1_080_000_000n),
-                gain(q1, '03/20/2025',   700_000_000n,   852_000_000n),
-                gain(q1, '03/25/2025', 2_780_000_000n, 2_115_000_000n),
-                gain(q2, '05/15/2025', 2_070_000_000n, 1_680_000_000n),
+                gain(q1, '12/01/2024', '02/10/2025', 1_430_000_000n, 1_080_000_000n),
+                gain(q1, '01/15/2025', '03/20/2025',   700_000_000n,   852_000_000n),
+                gain(q1, '02/01/2025', '03/25/2025', 2_780_000_000n, 2_115_000_000n),
+                gain(q2, '01/10/2025', '05/15/2025', 2_070_000_000n, 1_680_000_000n),
             ],
             total: [
                 totalRow(q1, 4_910_000_000n, 4_047_000_000n, 863_000_000n),
@@ -108,14 +110,14 @@ describe('calculateTax (integration)', () => {
                 usdGainLoss: m(  900_000_000n),
             },
             exchangeRates: [
-                { date: '2024-12-01', rate: m(1_350_000n) },
-                { date: '2025-01-10', rate: m(1_400_000n) },
-                { date: '2025-01-15', rate: m(1_420_000n) },
-                { date: '2025-02-01', rate: m(1_410_000n) },
-                { date: '2025-02-10', rate: m(1_430_000n) },
-                { date: '2025-03-20', rate: m(1_400_000n) },
-                { date: '2025-03-25', rate: m(1_390_000n) },
-                { date: '2025-05-15', rate: m(1_380_000n) },
+                { date: '2024-12-01', rateDate: '2024-12-01', rate: m(1_350_000n) },
+                { date: '2025-01-10', rateDate: '2025-01-10', rate: m(1_400_000n) },
+                { date: '2025-01-15', rateDate: '2025-01-15', rate: m(1_420_000n) },
+                { date: '2025-02-01', rateDate: '2025-02-01', rate: m(1_410_000n) },
+                { date: '2025-02-10', rateDate: '2025-02-10', rate: m(1_430_000n) },
+                { date: '2025-03-20', rateDate: '2025-03-20', rate: m(1_400_000n) },
+                { date: '2025-03-25', rateDate: '2025-03-25', rate: m(1_390_000n) },
+                { date: '2025-05-15', rateDate: '2025-05-15', rate: m(1_380_000n) },
             ],
         };
 
@@ -135,7 +137,7 @@ describe('calculateTax (integration)', () => {
         const result = await calculateTax(sales, [period]);
 
         expect(result.gains).toEqual([
-            gain(period, '03/16/2025', 140_000_000n, 140_000_000n),
+            gain(period, '03/15/2025', '03/16/2025', 140_000_000n, 140_000_000n),
         ]);
     });
 

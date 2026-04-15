@@ -23,7 +23,12 @@ const findWithLookback = (observations: Observation[], date: Date): Observation 
     return undefined;
 };
 
-export const fetchRates = async (dates: Date[]): Promise<Record<string, Money>> => {
+export interface FetchedRate {
+    rate: Money;
+    rateDate: string;
+}
+
+export const fetchRates = async (dates: Date[]): Promise<Record<string, FetchedRate>> => {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) {
@@ -35,7 +40,8 @@ export const fetchRates = async (dates: Date[]): Promise<Record<string, Money>> 
             dates.map(date => {
                 const observation = findWithLookback(data.observations, date);
                 const rate = observation?.FXUSDCAD ? moneyFromString(observation.FXUSDCAD.v) ?? ZERO : ZERO;
-                return [toIsoDate(date), rate];
+                const rateDate = observation?.d ?? toIsoDate(date);
+                return [toIsoDate(date), { rate, rateDate }];
             }),
         );
     } catch (error) {

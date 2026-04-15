@@ -1,6 +1,6 @@
 import { isWithinInterval } from 'date-fns';
 import { toIsoDate } from './format';
-import { fetchRates } from './fetchRates';
+import { fetchRates, type FetchedRate } from './fetchRates';
 import { addMoney, moneyFromString, mulMoney, subMoney, sumMoney, ZERO, type Money } from './money';
 
 export type Period = {
@@ -11,6 +11,7 @@ export type Period = {
 
 export const GAIN_FIELD = {
     Period: 'Period',
+    DateAcquired: 'Date Acquired',
     DateSold: 'Date Sold',
     Description: 'Description',
     Proceeds: 'Proceeds',
@@ -35,6 +36,7 @@ export type RecordType = 'Sell' | 'Summary';
 
 export type GainsType = {
     [GAIN_FIELD.Period]: Period;
+    [GAIN_FIELD.DateAcquired]: string;
     [GAIN_FIELD.DateSold]: string;
     [GAIN_FIELD.Description]: string;
     [GAIN_FIELD.Proceeds]: Money;
@@ -64,6 +66,7 @@ export interface VerificationData {
 
 export interface ExchangeRate {
     date: string;
+    rateDate: string;
     rate: Money;
 }
 
@@ -93,17 +96,18 @@ const findPeriod = (periods: Period[], date: Date): Period => {
 const buildGain = (
     row: EtradeData,
     periods: Period[],
-    rates: Record<string, Money>,
+    rates: Record<string, FetchedRate>,
 ): GainsType => {
     const dateSold = new Date(row[ETRADE_FIELD.DateSold]);
     const dateAcquired = new Date(row[ETRADE_FIELD.DateAcquired]);
     const proceedsUsd = parseMoney(row[ETRADE_FIELD.TotalProceeds]);
     const costBaseUsd = parseMoney(row[ETRADE_FIELD.AdjustedCostBasis]);
-    const proceeds = mulMoney(proceedsUsd, rates[toIsoDate(dateSold)]);
-    const costBase = mulMoney(costBaseUsd, rates[toIsoDate(dateAcquired)]);
+    const proceeds = mulMoney(proceedsUsd, rates[toIsoDate(dateSold)].rate);
+    const costBase = mulMoney(costBaseUsd, rates[toIsoDate(dateAcquired)].rate);
 
     return {
         [GAIN_FIELD.Period]: findPeriod(periods, dateSold),
+        [GAIN_FIELD.DateAcquired]: row[ETRADE_FIELD.DateAcquired],
         [GAIN_FIELD.DateSold]: row[ETRADE_FIELD.DateSold],
         [GAIN_FIELD.Description]: `${row[ETRADE_FIELD.Symbol]} ${row[ETRADE_FIELD.PlanType]}`,
         [GAIN_FIELD.Proceeds]: proceeds,
@@ -119,6 +123,7 @@ const totalForPeriod = (period: Period, gains: GainsType[]): GainsType => {
 
     return {
         [GAIN_FIELD.Period]: period,
+        [GAIN_FIELD.DateAcquired]: '',
         [GAIN_FIELD.DateSold]: '',
         [GAIN_FIELD.Description]: '',
         [GAIN_FIELD.Proceeds]: sum(GAIN_FIELD.Proceeds),
@@ -154,7 +159,7 @@ export const calculateTax = async (
     const { usdProceeds, usdGainLoss } = usdTotals(sales);
 
     const exchangeRates: ExchangeRate[] = Object.entries(rates)
-        .map(([date, rate]) => ({ date, rate }))
+        .map(([date, { rate, rateDate }]) => ({ date, rateDate, rate }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
     return {
