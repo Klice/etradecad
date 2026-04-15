@@ -44,10 +44,16 @@ export interface VerificationData {
     usdGainLoss: number;
 }
 
+export interface ExchangeRate {
+    date: string;
+    rate: number;
+}
+
 export interface ResultsType {
     gains: GainsType[];
     total: GainsType[];
     verification: VerificationData;
+    exchangeRates: ExchangeRate[];
 }
 
 export class GainsCalculator {
@@ -150,6 +156,10 @@ export class GainsCalculator {
             return this.getTotalForPeriod(period, gains);
         });
 
+        const exchangeRates: ExchangeRate[] = Object.entries(rates)
+            .map(([date, rate]) => ({ date, rate }))
+            .sort((a, b) => a.date.localeCompare(b.date));
+
         return {
             gains,
             total,
@@ -159,6 +169,7 @@ export class GainsCalculator {
                 usdProceeds: this.roundToTwoDecimals(usdProceeds),
                 usdGainLoss: this.roundToTwoDecimals(usdGainLoss),
             },
+            exchangeRates,
         };
     }
 }

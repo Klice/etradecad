@@ -1,9 +1,14 @@
-import type { EtradeData, VerificationData } from '../utils/GainsCalculator';
+import { Accordion, Table } from 'react-bootstrap';
+import ExchangeRatesTable from './ExchangeRatesTable';
+import TransactionsTable from './TransactionsTable';
+import type { EtradeData, ExchangeRate, GainsType, VerificationData } from '../utils/GainsCalculator';
 import { formatCurrency, parseCurrency } from '../utils/currency';
 
 interface DataVerificationProps {
     verification: VerificationData;
     summary: EtradeData | null;
+    exchangeRates: ExchangeRate[];
+    gains: GainsType[];
 }
 
 const CheckIcon = () => <span className="verification-check">&#10003;</span>;
@@ -15,7 +20,29 @@ interface CrossCheckRow {
     calculatedValue: number;
 }
 
-const DataVerification = ({ verification, summary }: DataVerificationProps) => {
+const SummaryRow = ({ data }: { data: EtradeData }) => {
+    const entries = Object.entries(data).filter(([, v]) => v !== '');
+    return (
+        <Table striped bordered size="sm" className="transactions-table mb-0">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {entries.map(([key, value]) => (
+                    <tr key={key}>
+                        <td className="text-muted">{key}</td>
+                        <td>{value}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </Table>
+    );
+};
+
+const DataVerification = ({ verification, summary, exchangeRates, gains }: DataVerificationProps) => {
     const crossChecks: CrossCheckRow[] = [];
 
     if (summary) {
@@ -48,16 +75,50 @@ const DataVerification = ({ verification, summary }: DataVerificationProps) => {
                     <CheckIcon />
                     <span>{verification.sellCount} sell transactions loaded</span>
                 </div>
+                <Accordion className="ms-4 mb-2">
+                    <Accordion.Item eventKey="txn">
+                        <Accordion.Header>
+                            All Transactions ({gains.length})
+                        </Accordion.Header>
+                        <Accordion.Body>
+                            <TransactionsTable data={gains} />
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
+
                 {summary && (
-                    <div className="verification-item">
-                        <CheckIcon />
-                        <span>1 summary row found</span>
-                    </div>
+                    <>
+                        <div className="verification-item">
+                            <CheckIcon />
+                            <span>1 summary row found</span>
+                        </div>
+                        <Accordion className="ms-4 mb-2">
+                            <Accordion.Item eventKey="summary">
+                                <Accordion.Header>
+                                    Imported Summary Row
+                                </Accordion.Header>
+                                <Accordion.Body>
+                                    <SummaryRow data={summary} />
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        </Accordion>
+                    </>
                 )}
+
                 <div className="verification-item">
                     <CheckIcon />
                     <span>Exchange rates fetched for {verification.uniqueDates} unique dates</span>
                 </div>
+                <Accordion className="ms-4 mb-2">
+                    <Accordion.Item eventKey="rates">
+                        <Accordion.Header>
+                            Exchange Rates ({exchangeRates.length})
+                        </Accordion.Header>
+                        <Accordion.Body>
+                            <ExchangeRatesTable rates={exchangeRates} />
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
 
                 {crossChecks.length > 0 && (
                     <>
@@ -69,7 +130,7 @@ const DataVerification = ({ verification, summary }: DataVerificationProps) => {
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>CSV Summary</th>
+                                    <th>Summary</th>
                                     <th>Calculated</th>
                                     <th></th>
                                 </tr>
