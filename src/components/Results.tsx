@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'react-bootstrap-icons';
 import TaxSummary from './TaxSummary';
 import DataVerification from './DataVerification';
 import type { EtradeData, ResultsType } from '../utils/GainsCalculator';
@@ -16,7 +17,7 @@ const ResultsPage = ({ results, summary, onReset }: ResultsPageProps) => {
                     eTrade Gains/Losses <span className="text-muted fw-normal">USD &rarr; CAD</span>
                 </h4>
                 <button className="btn btn-outline-secondary btn-sm" onClick={onReset}>
-                    Upload new file
+                    <ArrowLeft size={14} className="me-1" />Upload new file
                 </button>
             </div>
 

@@ -84,7 +84,7 @@ const TaxSummary = ({ totals }: TaxSummaryProps) => {
             {totals.map((row, i) => (
                 <PeriodBlock key={i} row={row} showPeriod={showPeriod} />
             ))}
-            <div className="d-flex justify-content-between align-items-center p-2">
+            <div className="d-flex justify-content-between align-items-center" style={{ padding: '10px 16px' }}>
                 <a
                     href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-12700-capital-gains/calculating-reporting-your-capital-gains-losses.html"
                     target="_blank"

@@ -9,7 +9,7 @@ const LandingPage = ({ onFileSelect }: LandingPageProps) => {
     return (
         <div className="container landing-container">
             <div className="py-5 text-center">
-                <h1 className="mb-2">eTrade Gains/Losses</h1>
+                <h1 className="mb-2"><span className="text-primary">eTrade</span> Gains/Losses</h1>
                 <p className="text-muted fs-5">USD to CAD Converter</p>
             </div>
 
