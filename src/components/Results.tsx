@@ -1,5 +1,3 @@
-import { Accordion } from 'react-bootstrap';
-import DataTable from './DataTable';
 import TaxSummary from './TaxSummary';
 import DataVerification from './DataVerification';
 import type { EtradeData, ResultsType } from '../utils/GainsCalculator';
@@ -27,18 +25,9 @@ const ResultsPage = ({ results, summary, onReset }: ResultsPageProps) => {
             <DataVerification
                 verification={results.verification}
                 summary={summary}
+                exchangeRates={results.exchangeRates}
+                gains={results.gains}
             />
-
-            <Accordion className="mb-4">
-                <Accordion.Item eventKey="0">
-                    <Accordion.Header>
-                        All Transactions ({results.gains.length})
-                    </Accordion.Header>
-                    <Accordion.Body>
-                        <DataTable data={results.gains} />
-                    </Accordion.Body>
-                </Accordion.Item>
-            </Accordion>
         </div>
     );
 };

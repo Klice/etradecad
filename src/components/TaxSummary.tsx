@@ -50,7 +50,10 @@ const TaxSummary = ({ totals }: TaxSummaryProps) => {
 
     return (
         <div className="cra-card mb-4">
-            <div className="cra-header">Schedule 3 &mdash; Capital Gains (Losses)</div>
+            <div className="cra-header">
+                Schedule 3 &mdash; Capital Gains (Losses)
+                <span className="cra-header-note">Values converted to CAD using Bank of Canada exchange rates</span>
+            </div>
             {totals.map((row, i) => (
                 <PeriodBlock key={i} row={row} showPeriod={showPeriod} />
             ))}
