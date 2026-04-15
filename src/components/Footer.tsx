@@ -1,5 +1,5 @@
-const Footer: React.FC = () => (
-    <footer className="bg-light text-center py-3 mt-4">
+const Footer = () => (
+    <footer className="text-center py-3 mt-4 text-muted">
         <a
             href="https://github.com/Klice/etradecad"
             target="_blank"
