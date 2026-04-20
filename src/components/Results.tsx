@@ -6,10 +6,11 @@ import type { EtradeData, ResultsType } from '../utils/GainsCalculator';
 interface ResultsPageProps {
     results: ResultsType;
     summary: EtradeData | null;
+    sales: EtradeData[];
     onReset: () => void;
 }
 
-const ResultsPage = ({ results, summary, onReset }: ResultsPageProps) => {
+const ResultsPage = ({ results, summary, sales, onReset }: ResultsPageProps) => {
     return (
         <div className="container results-container">
             <div className="d-flex justify-content-between align-items-center py-4">
@@ -26,6 +27,7 @@ const ResultsPage = ({ results, summary, onReset }: ResultsPageProps) => {
             <DataVerification
                 verification={results.verification}
                 summary={summary}
+                sales={sales}
                 exchangeRates={results.exchangeRates}
                 gains={results.gains}
             />

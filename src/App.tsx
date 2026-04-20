@@ -12,10 +12,12 @@ const periods: Period[] = [
 const App = () => {
     const [results, setResults] = useState<ResultsType | null>(null);
     const [summary, setSummary] = useState<EtradeData | null>(null);
+    const [sales, setSales] = useState<EtradeData[]>([]);
 
     const handleFileSelect = async (file: File) => {
         const parsed: ParseResult = await parseXls(file);
         setSummary(parsed.summary);
+        setSales(parsed.sales);
         const calculated = await calculateTax(parsed.sales, periods);
         setResults(calculated);
     };
@@ -23,12 +25,13 @@ const App = () => {
     const handleReset = () => {
         setResults(null);
         setSummary(null);
+        setSales([]);
     };
 
     return (
         <div className="App">
             {results ? (
-                <ResultsPage results={results} summary={summary} onReset={handleReset} />
+                <ResultsPage results={results} summary={summary} sales={sales} onReset={handleReset} />
             ) : (
                 <LandingPage onFileSelect={handleFileSelect} />
             )}
