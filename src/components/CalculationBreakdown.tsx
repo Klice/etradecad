@@ -1,4 +1,5 @@
 import { Accordion, Table } from 'react-bootstrap';
+import { CheckLg } from 'react-bootstrap-icons';
 import { CSVLink } from 'react-csv';
 import RateLink from './RateLink';
 import { ETRADE_FIELD, GAIN_FIELD, type EtradeData, type ExchangeRate, type GainsType } from '../utils/GainsCalculator';
@@ -43,13 +44,23 @@ const CalculationBreakdown = ({ sales, gains, exchangeRates }: CalculationBreakd
     const csvData = sales.map((sale, i) => toCsvRow(sale, gains[i], exchangeRates));
 
     return (
-        <div>
-            <div className="mb-3 text-end">
-                <CSVLink className="btn btn-sm btn-outline-primary" data={csvData} filename="calculation-breakdown.csv">
-                    Download CSV
-                </CSVLink>
+        <>
+            <div className="verification-item">
+                <CheckLg className="verification-check" />
+                <span>Calculation Breakdown</span>
             </div>
-            <Accordion>
+            <Accordion className="ms-4 mb-2">
+                <Accordion.Item eventKey="breakdown">
+                    <Accordion.Header>
+                        Calculation Details <span className="verification-badge">{gains.length}</span>
+                    </Accordion.Header>
+                    <Accordion.Body>
+                        <div className="mb-3 text-end">
+                            <CSVLink className="btn btn-sm btn-outline-primary" data={csvData} filename="calculation-breakdown.csv">
+                                Download CSV
+                            </CSVLink>
+                        </div>
+                        <Accordion>
             {sales.map((sale, i) => {
                 const gain = gains[i];
                 const proceedsUsd = moneyFromString(sale[ETRADE_FIELD.TotalProceeds]) ?? ZERO;
@@ -144,8 +155,11 @@ const CalculationBreakdown = ({ sales, gains, exchangeRates }: CalculationBreakd
                     </Accordion.Item>
                 );
             })}
+                        </Accordion>
+                    </Accordion.Body>
+                </Accordion.Item>
             </Accordion>
-        </div>
+        </>
     );
 };
 

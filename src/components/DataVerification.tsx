@@ -92,20 +92,7 @@ const DataVerification = ({ verification, summary, sales, exchangeRates, gains }
                     </Accordion.Item>
                 </Accordion>
 
-                <div className="verification-item">
-                    <CheckIcon />
-                    <span>Calculation Breakdown</span>
-                </div>
-                <Accordion className="ms-4 mb-2">
-                    <Accordion.Item eventKey="breakdown">
-                        <Accordion.Header>
-                            Calculation Details <span className="verification-badge">{gains.length}</span>
-                        </Accordion.Header>
-                        <Accordion.Body>
-                            <CalculationBreakdown sales={sales} gains={gains} exchangeRates={exchangeRates} />
-                        </Accordion.Body>
-                    </Accordion.Item>
-                </Accordion>
+                <CalculationBreakdown sales={sales} gains={gains} exchangeRates={exchangeRates} />
 
                 {summary && (
                     <>
