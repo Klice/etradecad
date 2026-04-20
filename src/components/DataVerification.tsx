@@ -1,5 +1,6 @@
 import { Accordion, Table } from 'react-bootstrap';
 import { CheckLg, ExclamationTriangleFill } from 'react-bootstrap-icons';
+import CalculationBreakdown from './CalculationBreakdown';
 import ExchangeRatesTable from './ExchangeRatesTable';
 import TransactionsTable from './TransactionsTable';
 import { ETRADE_FIELD, type EtradeData, type ExchangeRate, type GainsType, type VerificationData } from '../utils/GainsCalculator';
@@ -9,6 +10,7 @@ import { moneyFromString, subMoney, type Money } from '../utils/money';
 interface DataVerificationProps {
     verification: VerificationData;
     summary: EtradeData | null;
+    sales: EtradeData[];
     exchangeRates: ExchangeRate[];
     gains: GainsType[];
 }
@@ -46,7 +48,7 @@ const SummaryRow = ({ data }: { data: EtradeData }) => {
     );
 };
 
-const DataVerification = ({ verification, summary, exchangeRates, gains }: DataVerificationProps) => {
+const DataVerification = ({ verification, summary, sales, exchangeRates, gains }: DataVerificationProps) => {
     const crossChecks: CrossCheckRow[] = [];
 
     if (summary) {
@@ -86,6 +88,21 @@ const DataVerification = ({ verification, summary, exchangeRates, gains }: DataV
                         </Accordion.Header>
                         <Accordion.Body>
                             <TransactionsTable data={gains} />
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
+
+                <div className="verification-item">
+                    <CheckIcon />
+                    <span>Calculation breakdown</span>
+                </div>
+                <Accordion className="ms-4 mb-2">
+                    <Accordion.Item eventKey="breakdown">
+                        <Accordion.Header>
+                            Calculation Details <span className="verification-badge">{gains.length}</span>
+                        </Accordion.Header>
+                        <Accordion.Body>
+                            <CalculationBreakdown sales={sales} gains={gains} exchangeRates={exchangeRates} />
                         </Accordion.Body>
                     </Accordion.Item>
                 </Accordion>
