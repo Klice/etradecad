@@ -1,18 +1,9 @@
 import { Accordion, Table } from 'react-bootstrap';
-import { BoxArrowUpRight } from 'react-bootstrap-icons';
 import { CSVLink } from 'react-csv';
+import RateLink from './RateLink';
 import { ETRADE_FIELD, GAIN_FIELD, type EtradeData, type ExchangeRate, type GainsType } from '../utils/GainsCalculator';
 import { formatCurrency, formatDate, gainClass } from '../utils/format';
 import { formatMoney, moneyFromString, ZERO } from '../utils/money';
-
-const bocUrl = (date: string) =>
-    `https://www.bankofcanada.ca/rates/exchange/daily-exchange-rates-lookup/?lookupPage=lookup_daily_exchange_rates_2017.php&startRange=2017-01-01&series%5B%5D=FXUSDCAD&lookupPage=lookup_daily_exchange_rates_2017.php&startRange=2017-01-01&rangeType=range&rangeValue=&dFrom=${date}&dTo=&submit_button=Submit`;
-
-const RateLink = ({ rate }: { rate: ExchangeRate }) => (
-    <a href={bocUrl(rate.rateDate)} target="_blank" rel="noopener noreferrer" className="text-decoration-none">
-        {formatMoney(rate.rate, { decimals: 4 })} <BoxArrowUpRight size={10} className="text-muted" />
-    </a>
-);
 
 interface CalculationBreakdownProps {
     sales: EtradeData[];

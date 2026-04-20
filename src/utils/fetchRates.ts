@@ -1,4 +1,5 @@
 import { subDays } from 'date-fns';
+import { BOC_VALET_URL } from './boc';
 import { toIsoDate } from './format';
 import { moneyFromString, ZERO, type Money } from './money';
 
@@ -7,7 +8,6 @@ interface Observation {
     FXUSDCAD?: { v: string };
 }
 
-const API_URL = 'https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json';
 const MAX_LOOKBACK_DAYS = 2;
 
 const findObservation = (observations: Observation[], date: Date): Observation | undefined => {
@@ -30,7 +30,7 @@ export interface FetchedRate {
 
 export const fetchRates = async (dates: Date[]): Promise<Record<string, FetchedRate>> => {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(BOC_VALET_URL);
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }
