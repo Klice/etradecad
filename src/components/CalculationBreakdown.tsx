@@ -1,5 +1,6 @@
 import { Accordion, Table } from 'react-bootstrap';
 import { BoxArrowUpRight } from 'react-bootstrap-icons';
+import { CSVLink } from 'react-csv';
 import { ETRADE_FIELD, GAIN_FIELD, type EtradeData, type ExchangeRate, type GainsType } from '../utils/GainsCalculator';
 import { formatCurrency, formatDate, gainClass } from '../utils/format';
 import { formatMoney, moneyFromString, ZERO } from '../utils/money';
@@ -25,9 +26,39 @@ const findRate = (rates: ExchangeRate[], dateStr: string): ExchangeRate | undefi
     return rates.find(r => r.date === iso);
 };
 
+const toCsvRow = (sale: EtradeData, gain: GainsType | undefined, rates: ExchangeRate[]) => {
+    const proceedsUsd = moneyFromString(sale[ETRADE_FIELD.TotalProceeds]) ?? ZERO;
+    const costBaseUsd = moneyFromString(sale[ETRADE_FIELD.AdjustedCostBasis]) ?? ZERO;
+    const rateSold = findRate(rates, sale[ETRADE_FIELD.DateSold]);
+    const rateAcquired = findRate(rates, sale[ETRADE_FIELD.DateAcquired]);
+    return {
+        'Symbol': sale[ETRADE_FIELD.Symbol],
+        'Plan Type': sale[ETRADE_FIELD.PlanType],
+        'Date Acquired': formatDate(sale[ETRADE_FIELD.DateAcquired]),
+        'Cost Basis (USD)': formatMoney(costBaseUsd, { decimals: 2 }),
+        'Rate Date (Acquired)': rateAcquired?.rateDate ?? '',
+        'Exchange Rate (Acquired)': rateAcquired ? formatMoney(rateAcquired.rate, { decimals: 4 }) : '',
+        'Cost Base (CAD)': gain ? formatMoney(gain[GAIN_FIELD.CostBase], { decimals: 2 }) : '',
+        'Date Sold': formatDate(sale[ETRADE_FIELD.DateSold]),
+        'Proceeds (USD)': formatMoney(proceedsUsd, { decimals: 2 }),
+        'Rate Date (Sold)': rateSold?.rateDate ?? '',
+        'Exchange Rate (Sold)': rateSold ? formatMoney(rateSold.rate, { decimals: 4 }) : '',
+        'Proceeds (CAD)': gain ? formatMoney(gain[GAIN_FIELD.Proceeds], { decimals: 2 }) : '',
+        'Gain/Loss (CAD)': gain ? formatMoney(gain[GAIN_FIELD.GainLoss], { decimals: 2 }) : '',
+    };
+};
+
 const CalculationBreakdown = ({ sales, gains, exchangeRates }: CalculationBreakdownProps) => {
+    const csvData = sales.map((sale, i) => toCsvRow(sale, gains[i], exchangeRates));
+
     return (
-        <Accordion>
+        <div>
+            <div className="mb-3 text-end">
+                <CSVLink className="btn btn-sm btn-outline-primary" data={csvData} filename="calculation-breakdown.csv">
+                    Download CSV
+                </CSVLink>
+            </div>
+            <Accordion>
             {sales.map((sale, i) => {
                 const gain = gains[i];
                 const proceedsUsd = moneyFromString(sale[ETRADE_FIELD.TotalProceeds]) ?? ZERO;
@@ -122,7 +153,8 @@ const CalculationBreakdown = ({ sales, gains, exchangeRates }: CalculationBreakd
                     </Accordion.Item>
                 );
             })}
-        </Accordion>
+            </Accordion>
+        </div>
     );
 };
 
