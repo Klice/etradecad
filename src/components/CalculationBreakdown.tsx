@@ -1,17 +1,10 @@
 import { Accordion, Table } from 'react-bootstrap';
-import { BoxArrowUpRight } from 'react-bootstrap-icons';
+import { CheckLg } from 'react-bootstrap-icons';
+import { CSVLink } from 'react-csv';
+import RateLink from './RateLink';
 import { ETRADE_FIELD, GAIN_FIELD, type EtradeData, type ExchangeRate, type GainsType } from '../utils/GainsCalculator';
 import { formatCurrency, formatDate, gainClass } from '../utils/format';
 import { formatMoney, moneyFromString, ZERO } from '../utils/money';
-
-const bocUrl = (date: string) =>
-    `https://www.bankofcanada.ca/rates/exchange/daily-exchange-rates-lookup/?lookupPage=lookup_daily_exchange_rates_2017.php&startRange=2017-01-01&series%5B%5D=FXUSDCAD&lookupPage=lookup_daily_exchange_rates_2017.php&startRange=2017-01-01&rangeType=range&rangeValue=&dFrom=${date}&dTo=&submit_button=Submit`;
-
-const RateLink = ({ rate }: { rate: ExchangeRate }) => (
-    <a href={bocUrl(rate.rateDate)} target="_blank" rel="noopener noreferrer" className="text-decoration-none">
-        {formatMoney(rate.rate, { decimals: 4 })} <BoxArrowUpRight size={10} className="text-muted" />
-    </a>
-);
 
 interface CalculationBreakdownProps {
     sales: EtradeData[];
@@ -25,9 +18,49 @@ const findRate = (rates: ExchangeRate[], dateStr: string): ExchangeRate | undefi
     return rates.find(r => r.date === iso);
 };
 
+const toCsvRow = (sale: EtradeData, gain: GainsType | undefined, rates: ExchangeRate[]) => {
+    const proceedsUsd = moneyFromString(sale[ETRADE_FIELD.TotalProceeds]) ?? ZERO;
+    const costBaseUsd = moneyFromString(sale[ETRADE_FIELD.AdjustedCostBasis]) ?? ZERO;
+    const rateSold = findRate(rates, sale[ETRADE_FIELD.DateSold]);
+    const rateAcquired = findRate(rates, sale[ETRADE_FIELD.DateAcquired]);
+    return {
+        'Symbol': sale[ETRADE_FIELD.Symbol],
+        'Plan Type': sale[ETRADE_FIELD.PlanType],
+        'Date Acquired': formatDate(sale[ETRADE_FIELD.DateAcquired]),
+        'Cost Basis (USD)': formatMoney(costBaseUsd, { decimals: 2 }),
+        'Rate Date (Acquired)': rateAcquired?.rateDate ?? '',
+        'Exchange Rate (Acquired)': rateAcquired ? formatMoney(rateAcquired.rate, { decimals: 4 }) : '',
+        'Cost Base (CAD)': gain ? formatMoney(gain[GAIN_FIELD.CostBase], { decimals: 2 }) : '',
+        'Date Sold': formatDate(sale[ETRADE_FIELD.DateSold]),
+        'Proceeds (USD)': formatMoney(proceedsUsd, { decimals: 2 }),
+        'Rate Date (Sold)': rateSold?.rateDate ?? '',
+        'Exchange Rate (Sold)': rateSold ? formatMoney(rateSold.rate, { decimals: 4 }) : '',
+        'Proceeds (CAD)': gain ? formatMoney(gain[GAIN_FIELD.Proceeds], { decimals: 2 }) : '',
+        'Gain/Loss (CAD)': gain ? formatMoney(gain[GAIN_FIELD.GainLoss], { decimals: 2 }) : '',
+    };
+};
+
 const CalculationBreakdown = ({ sales, gains, exchangeRates }: CalculationBreakdownProps) => {
+    const csvData = sales.map((sale, i) => toCsvRow(sale, gains[i], exchangeRates));
+
     return (
-        <Accordion>
+        <>
+            <div className="verification-item">
+                <CheckLg className="verification-check" />
+                <span>Calculation Breakdown</span>
+            </div>
+            <Accordion className="ms-4 mb-2">
+                <Accordion.Item eventKey="breakdown">
+                    <Accordion.Header>
+                        Calculation Details <span className="verification-badge">{gains.length}</span>
+                    </Accordion.Header>
+                    <Accordion.Body>
+                        <div className="mb-3 text-end">
+                            <CSVLink className="btn btn-sm btn-outline-primary" data={csvData} filename="calculation-breakdown.csv">
+                                Download CSV
+                            </CSVLink>
+                        </div>
+                        <Accordion>
             {sales.map((sale, i) => {
                 const gain = gains[i];
                 const proceedsUsd = moneyFromString(sale[ETRADE_FIELD.TotalProceeds]) ?? ZERO;
@@ -122,7 +155,11 @@ const CalculationBreakdown = ({ sales, gains, exchangeRates }: CalculationBreakd
                     </Accordion.Item>
                 );
             })}
-        </Accordion>
+                        </Accordion>
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
+        </>
     );
 };
 
