@@ -94,7 +94,7 @@ const DataVerification = ({ verification, summary, sales, exchangeRates, gains }
 
                 <div className="verification-item">
                     <CheckIcon />
-                    <span>Calculation breakdown</span>
+                    <span>Calculation Breakdown</span>
                 </div>
                 <Accordion className="ms-4 mb-2">
                     <Accordion.Item eventKey="breakdown">
