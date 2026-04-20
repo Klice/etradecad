@@ -10,7 +10,10 @@ export const formatCurrency = (value: Money): string => {
 
 export const toIsoDate = (date: Date): string => format(date, ISO_DATE);
 
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 export const formatDate = (value: string): string => {
+    if (ISO_DATE_RE.test(value)) return value;
     const date = new Date(value);
     return isValid(date) ? format(date, ISO_DATE) : value;
 };
