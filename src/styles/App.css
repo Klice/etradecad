@@ -85,6 +85,13 @@ body {
     white-space: pre-line;
 }
 
+.cra-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
 .cra-period-title {
     background: #ecf0f1;
     padding: 8px 16px;
@@ -123,6 +130,28 @@ body {
 .cra-row-highlight .cra-row-label {
     color: #000;
     font-weight: 700;
+}
+
+.cra-block-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cra-table-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+}
+
+.cra-block-copied {
+    opacity: 0.55;
+    background: #f3f4f6;
+}
+
+.cra-table tbody tr.cra-block-copied {
+    opacity: 0.55;
+    background: #f3f4f6;
 }
 
 .gain-positive,

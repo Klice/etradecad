@@ -22,7 +22,7 @@ const ResultsPage = ({ results, summary, sales, onReset }: ResultsPageProps) => 
                 </button>
             </div>
 
-            <TaxSummary totals={results.total} />
+            <TaxSummary totals={results.total} gains={results.gains} />
 
             <DataVerification
                 verification={results.verification}
