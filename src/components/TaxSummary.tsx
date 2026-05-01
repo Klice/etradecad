@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { CSVLink } from 'react-csv';
-import { BoxArrowUpRight, CheckCircleFill, InfoCircle } from 'react-bootstrap-icons';
-import { OverlayTrigger, Table, Tooltip } from 'react-bootstrap';
+import { BoxArrowUpRight, InfoCircle } from 'react-bootstrap-icons';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import CopyButton from './CopyButton';
+import TransactionsView from './TransactionsView';
 import { GAIN_FIELD, type GainsType, type Period } from '../utils/GainsCalculator';
 import { formatCurrency, gainClass } from '../utils/format';
 import { formatMoney } from '../utils/money';
@@ -16,18 +18,6 @@ const copyRowToClipboard = async (name: string, row: GainsType): Promise<void> =
     ].join('\t');
     await navigator.clipboard.writeText(tsv);
 };
-
-const CopyButton = ({ copied, onClick }: { copied: boolean; onClick: () => void }) => (
-    <button
-        type="button"
-        className="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
-        onClick={onClick}
-        title="Copy Proceeds, ACB, Outlays as tab-separated values"
-    >
-        {copied && <CheckCircleFill size={12} className="me-1 text-success" />}
-        <span>{copied ? 'Copied' : 'Copy'}</span>
-    </button>
-);
 
 type View = 'totals' | 'transactions';
 
@@ -102,43 +92,6 @@ The cost of a capital property is its actual or deemed cost, depending on the ty
         </div>
     );
 };
-
-interface TransactionsViewProps {
-    rows: GainsType[];
-    isCopied: (i: number) => boolean;
-    onCopy: (i: number) => void;
-}
-
-const TransactionsView = ({ rows, isCopied, onCopy }: TransactionsViewProps) => (
-    <Table responsive hover size="sm" className="cra-table mb-0">
-        <thead>
-            <tr>
-                <th>Transaction</th>
-                <th className="text-end">Proceeds of disposition</th>
-                <th className="text-end">Adjusted cost base</th>
-                <th className="text-end">Outlays and expenses</th>
-                <th className="text-end">Gain (Loss)</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {rows.map((row, i) => {
-                const gainLoss = row[GAIN_FIELD.GainLoss];
-                const copied = isCopied(i);
-                return (
-                    <tr key={i} className={copied ? 'cra-block-copied' : ''}>
-                        <td>{row[GAIN_FIELD.Description]}</td>
-                        <td className="text-end cra-table-value">{formatCurrency(row[GAIN_FIELD.Proceeds])}</td>
-                        <td className="text-end cra-table-value">{formatCurrency(row[GAIN_FIELD.CostBase])}</td>
-                        <td className="text-end cra-table-value">{formatCurrency(row[GAIN_FIELD.Expenses])}</td>
-                        <td className={`text-end cra-table-value ${gainClass(gainLoss)}`}>{formatCurrency(gainLoss)}</td>
-                        <td className="text-end"><CopyButton copied={copied} onClick={() => onCopy(i)} /></td>
-                    </tr>
-                );
-            })}
-        </tbody>
-    </Table>
-);
 
 const TaxSummary = ({ totals, gains }: TaxSummaryProps) => {
     const [view, setView] = useState<View>('totals');
